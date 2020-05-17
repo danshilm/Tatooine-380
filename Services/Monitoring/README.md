@@ -1,0 +1,3 @@
+This has a compose file comprising of (almost) everything that I use to monitor my system. Netdata is in the compose file in the EntryPoint folder. 
+
+__Grafana__ is used to display the dashboard, __InfluxDB__ is where all the metrics are stored in, __Netdata__ is just [sexy as hell](https://user-images.githubusercontent.com/1153921/80827388-b9fee100-8b98-11ea-8f60-0d7824667cd3.gif), __Speedtest__ is used to get periodical speedtests and show it on the Grafana dashboard, __Varken__ is used to get stats about Plex and all the *rrs.

@@ -1,0 +1,1 @@
+Does not require anything special. Compose file + the ini file has it all.
