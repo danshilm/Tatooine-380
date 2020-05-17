@@ -1,0 +1,9 @@
+folder_sizes,folder=Anime size=999
+folder_sizes,folder=Collections size=999
+folder_sizes,folder=Movies size=999
+folder_sizes,folder=Movies-4K size=999
+folder_sizes,folder=MyTvShows size=999
+folder_sizes,folder=Readables size=999
+folder_sizes,folder=SpecialTvShows size=999
+folder_sizes,folder=TvShows size=999
+folder_sizes,folder=Services size=999
