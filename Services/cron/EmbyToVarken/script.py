@@ -59,7 +59,12 @@ for session in sessions:
 				session_dict['quality'] = "1440p"
 			elif (session['NowPlayingItem']['Width'] <= 3840):
 				session_dict['quality'] = "4K"
+
+			session_dict['transcode_hw_decoding'] = 0
+			session_dict['transcode_hw_encoding'] = 0
+
 		else:
+
 			if (session['TranscodingInfo']['Width'] <= 640):
 				session_dict['quality'] = "SD"
 				session_dict['quality_profile'] = "SD"
@@ -79,22 +84,22 @@ for session in sessions:
 				session_dict['quality'] = "4K"
 				session_dict['quality_profile'] = "4K"
 
+			if (session['TranscodingInfo']['VideoDecoderIsHardware'] == True):
+				session_dict['transcode_hw_decoding'] = 1
+			else:
+				session_dict['transcode_hw_decoding'] = 0
+
+			if (session['TranscodingInfo']['VideoEncoderIsHardware'] == True):
+				session_dict['transcode_hw_encoding'] = 1
+			else:
+				session_dict['transcode_hw_encoding'] = 0
+
 		if (session['PlayState']['IsPaused'] == True):
 			session_dict['player_state'] = 1
 		else:
 			session_dict['player_state'] = 0
 
 		session_dict['progress_percent'] = round((session['PlayState']['PositionTicks'] / session['NowPlayingItem']['RunTimeTicks']) * 100)
-
-		if (session['TranscodingInfo']['VideoDecoderIsHardware'] == True):
-			session_dict['transcode_hw_decoding'] = 1
-		else:
-			session_dict['transcode_hw_decoding'] = 0
-		
-		if (session['TranscodingInfo']['VideoEncoderIsHardware'] == True):
-			session_dict['transcode_hw_encoding'] = 1
-		else:
-			session_dict['transcode_hw_encoding'] = 0
 
 		if (session_dict['video_decision'] == "Direct Play" or session_dict['video_decision'] == "Direct Stream"):
 			session_dict['audio_codec'] = session['NowPlayingItem']['MediaStreams'][session['PlayState']['AudioStreamIndex']]['Codec']
@@ -154,5 +159,5 @@ if (payload != []):
             'Check your database! Error: %s', e)
 
 # print(sessions)
-# print(payload)
+print(payload)
 client.close()
