@@ -12,7 +12,6 @@ from influxdb.exceptions import InfluxDBServerError
 from hashlib import md5
 
 EMBY_URL = "http://localhost:8096/emby/Sessions?api_key=apikey"
-# INFLUX_URL = "http://localhost:8086/write?db=varken"
 response = requests.get(url = EMBY_URL)
 sessions = response.json()
 client = InfluxDBClient(host='localhost', port=8086, database='varken')
@@ -28,9 +27,7 @@ for session in sessions:
 	if ("NowPlayingItem" in session):
 
 		if ("SeriesName" in session['NowPlayingItem']):
-			# will change in the future for SeriesName - S00E00 EpisodeName
-			# it's just more easily identifiable that way
-			media_title = session['NowPlayingItem']['SeriesName'] + " - " + session['NowPlayingItem']['Name']
+			media_title = session['NowPlayingItem']['SeriesName'] + " - S" + str("{0:0=2d}".format(session['NowPlayingItem']['ParentIndexNumber'])) + "E" + str("{0:0=2d}".format(session['NowPlayingItem']['IndexNumber'])) + ": " + session['NowPlayingItem']['Name']
 			session_dict['title'] = media_title
 			session_dict['media_type'] = "Episode"
 		else:
@@ -63,6 +60,8 @@ for session in sessions:
 			session_dict['transcode_hw_decoding'] = 0
 			session_dict['transcode_hw_encoding'] = 0
 
+			session_dict['audio_codec'] = session['NowPlayingItem']['MediaStreams'][session['PlayState']['AudioStreamIndex']]['Codec']
+
 		else:
 
 			if (session['TranscodingInfo']['Width'] <= 640):
@@ -94,17 +93,14 @@ for session in sessions:
 			else:
 				session_dict['transcode_hw_encoding'] = 0
 
+			session_dict['audio_codec'] = session['TranscodingInfo']['AudioCodec']
+
 		if (session['PlayState']['IsPaused'] == True):
 			session_dict['player_state'] = 1
 		else:
 			session_dict['player_state'] = 0
 
 		session_dict['progress_percent'] = round((session['PlayState']['PositionTicks'] / session['NowPlayingItem']['RunTimeTicks']) * 100)
-
-		if (session_dict['video_decision'] == "Direct Play" or session_dict['video_decision'] == "Direct Stream"):
-			session_dict['audio_codec'] = session['NowPlayingItem']['MediaStreams'][session['PlayState']['AudioStreamIndex']]['Codec']
-		else:
-			session_dict['audio_codec'] = session['TranscodingInfo']['AudioCodec']
 
 		hash_id = hashit(f"{session['Id']}{session['UserName']}{session['DeviceId']}")
 		now = now = datetime.now(timezone.utc).astimezone().isoformat()
