@@ -9,7 +9,7 @@ sudo du -s /home/user/Services/ >> file_sizes.txt
 sed -i 's/\/media\/TheVault\/PlexMediaServer\///g' file_sizes.txt
 sed -i 's/\home\/user\///g' file_sizes.txt
 
-# folders to monitor are: Anime, Collections, Movies, MyTVShows, Readables, SpecialTvShows, TvShows, Services
+# folders to monitor are: Anime, Collections, Movies, Readables, TvShows, Services
 Anime=$(grep "Anime" file_sizes.txt | grep -oP '\d*\s+' | tr -d '[:space:]')
 Collections=$(grep "Collections" file_sizes.txt | grep -oP '\d*\s+' | tr -d '[:space:]')
 Movies=$(grep -e "Movies$" file_sizes.txt | grep -oP '\d*\s+' | tr -d '[:space:]')
