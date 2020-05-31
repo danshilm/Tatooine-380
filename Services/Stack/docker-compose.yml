@@ -1,0 +1,815 @@
+version: "3.7"
+
+networks:
+  t2_web:
+    external:
+      name: t2_web
+  t2_proxy:
+    external:
+      name: t2_proxy
+
+services:
+  dockerproxy:
+    image: tecnativa/docker-socket-proxy
+    hostname: dockerproxy
+    container_name: dockerproxy
+    networks:
+      - t2_proxy
+    ports:
+      - 2375:2375
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+    restart: unless-stopped
+
+  traefik2:
+    image: traefik:v2.2
+    container_name: traefik2
+    hostname: traefik2
+    networks:
+      - t2_proxy
+      - t2_web
+    depends_on: 
+      - dockerproxy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      # https://www.reddit.com/r/docker/comments/c1wrep/traefik_reverse_proxy_question_docker_overlay/
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 8280
+        published: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - $USERDIR/Services/Stack/traefik2/traefik.toml:/etc/traefik/traefik.toml
+      - $USERDIR/Services/Stack/traefik2/rules:/rules # file provider directory
+      # - /var/run/docker.sock:/var/run/docker.sock:ro # use docker socket proxy for increased safety
+      - $USERDIR/Services/Stack/traefik2/acme.json:/acme.json # cert location - you must touch this file and change permissions to 600
+      - $USERDIR/Services/Stack/traefik2/traefik.log:/traefik.log # for fail2ban - make sure to touch file before starting container
+    environment:
+      - CF_API_EMAIL=$CLOUDFLARE_EMAIL
+      - CF_API_KEY=$CLOUDFLARE_API_KEY
+    labels:
+      - "traefik.enable=true"
+      # HTTP-to-HTTPS Redirect
+      - "traefik.http.routers.http-catchall.entrypoints=http"
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # HTTP Routers
+      - "traefik.http.routers.traefik-rtr.entrypoints=https"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME`)"
+      - "traefik.http.routers.traefik-rtr.tls=true"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.$DOMAINNAME"
+      ## Services - API
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
+      ## Middlewares
+      - "traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file"
+    
+  # traefik-error-pages:
+  #   image: "guillaumebriday/traefik-custom-error-pages"
+  #   container_name: "traefik-error-pages"
+  #   networks:
+  #     - t2_web
+  #   restart: unless-stopped
+
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    hostname: authelia
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 9091
+        published: 9091
+        protocol: tcp
+        mode: host
+    volumes:
+      - $USERDIR/Services/Authelia/authelia:/var/lib/authelia
+      - $USERDIR/Services/Authelia/configuration.yml:/etc/authelia/configuration.yml:ro
+      - $USERDIR/Services/Authelia/users_database.yml:/etc/authelia/users_database.yml
+      # - $USERDIR/Services/Authelia/notification.txt:/tmp/authelia/notification.txt
+    environment:
+      - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.authelia-rtr.entrypoints=https"
+      - "traefik.http.routers.authelia-rtr.rule=Host(`auth.$DOMAINNAME`)"
+      - "traefik.http.routers.authelia-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.authelia-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.authelia-rtr.service=authelia-svc"
+      - "traefik.http.services.authelia-svc.loadbalancer.server.port=9091"
+    restart: always
+
+  vpn:
+    image: dperson/openvpn-client
+    container_name: vpn
+    hostname: vpn
+    command: -d
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+      - label:disable
+    ports:
+      - target: 8100
+        published: 8100
+        protocol: tcp
+        mode: host
+      - target: 6881
+        published: 6881
+        protocol: tcp
+        mode: host
+      - target: 6881
+        published: 6881
+        protocol: udp
+        mode: host
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - TZ=$TZ
+    volumes:
+      - $USERDIR/Services/OpenVPN/vpn:/vpn
+      - /dev/net:/dev/net:z
+    stdin_open: true
+    tty: true
+    tmpfs:
+      - /run
+      - /tmp
+    restart: unless-stopped
+
+  qbittorrent:
+    image: "linuxserver/qbittorrent"
+    container_name: "qbittorrent"
+    depends_on: 
+      - vpn
+    network_mode: "service:vpn"
+    security_opt: 
+      - no-new-privileges:true
+    stdin_open: true
+    tty: true
+    volumes:
+      - $USERDIR/Services/qBitTorrent/:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/incomplete_downloads
+      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=002
+      - WEBUI_PORT=8100
+    labels:
+      - "traefik.enable=true"
+       ## HTTP Routers
+      - "traefik.http.routers.qbittorrent-rtr.entrypoints=https"
+      - "traefik.http.routers.qbittorrent-rtr.rule=Host(`qbit.$DOMAINNAME`)"
+      - "traefik.http.routers.qbittorrent-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.qbittorrent-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.qbittorrent-rtr.service=qbittorrent-svc"
+      - "traefik.http.services.qbittorrent-svc.loadbalancer.server.port=8100"
+    restart: unless-stopped
+
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    hostname: radarr
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 7878
+        published: 7878
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Radarr/:/config
+      - $THEVAULTDIR/PlexMediaServer/Movies/:/movies
+      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/movies-4K
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.radarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.radarr-rtr-bypass.tls=true"
+      - "traefik.http.routers.radarr-rtr-bypass.rule=Headers(`X-Api-Key`, `$RADARR_API_KEY`)"
+      - "traefik.http.routers.radarr-rtr-bypass.priority=100"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.radarr-rtr.entrypoints=https"
+      - "traefik.http.routers.radarr-rtr.tls=true"
+      - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.$DOMAINNAME`)"
+      - "traefik.http.routers.radarr-rtr.priority=99"
+      ## Middlewares
+      - "traefik.http.routers.radarr-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.radarr-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.radarr-rtr.service=radarr-svc"
+      - "traefik.http.routers.radarr-rtr-bypass.service=radarr-svc"
+      - "traefik.http.services.radarr-svc.loadbalancer.server.port=7878"
+    restart: unless-stopped
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    hostname: sonarr
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 8989
+        published: 8989
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Sonarr/:/config
+      - $THEVAULTDIR/PlexMediaServer/TvShows/:/TvShows
+      - $THEVAULTDIR/PlexMediaServer/Anime/:/Anime
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.sonarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.sonarr-rtr-bypass.tls=true"
+      - "traefik.http.routers.sonarr-rtr-bypass.rule=Headers(`X-Api-Key`, `$SONARR_API_KEY`)"
+      - "traefik.http.routers.sonarr-rtr-bypass.priority=100"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.sonarr-rtr.entrypoints=https"
+      - "traefik.http.routers.sonarr-rtr.tls=true"
+      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$DOMAINNAME`)"
+      - "traefik.http.routers.sonarr-rtr.priority=99"
+      ## Middlewares
+      - "traefik.http.routers.sonarr-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.sonarr-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.sonarr-rtr.service=sonarr-svc"
+      - "traefik.http.routers.sonarr-rtr-bypass.service=sonarr-svc"
+      - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
+    restart: unless-stopped
+
+  bazarr:
+    image: linuxserver/bazarr
+    container_name: bazarr
+    hostname: bazarr
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 6767
+        published: 6767
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Bazarr/:/config
+      - $THEVAULTDIR/PlexMediaServer/Movies/:/Movies
+      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/movies-4K
+      - $THEVAULTDIR/PlexMediaServer/TvShows/:/TvShows
+      - $THEVAULTDIR/PlexMediaServer/Anime/:/Anime
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.bazarr-rtr.entrypoints=https"
+      - "traefik.http.routers.bazarr-rtr.rule=Host(`bazarr.$DOMAINNAME`)"
+      - "traefik.http.routers.bazarr-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.bazarr-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.bazarr-rtr.service=bazarr-svc"
+      - "traefik.http.services.bazarr-svc.loadbalancer.server.port=6767"
+    restart: unless-stopped
+
+  lazylibrarian:
+    image: linuxserver/lazylibrarian
+    container_name: lazylibrarian
+    hostname: lazylibrarian
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 5299
+        published: 5299
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+      # - DOCKER_MODS=linuxserver/calibre-web:calibre #optional
+    volumes:
+      - $USERDIR/Services/LazyLibrarian/:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/downloads
+      - $THEVAULTDIR/PlexMediaServer/Readables/Books/:/books
+      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks/:/audiobooks
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.lazylibrarian-rtr.entrypoints=https"
+      - "traefik.http.routers.lazylibrarian-rtr.rule=Host(`lazylib.$DOMAINNAME`)"
+      - "traefik.http.routers.lazylibrarian-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.lazylibrarian-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.lazylibrarian-rtr.service=lazylibrarian-svc"
+      - "traefik.http.services.lazylibrarian-svc.loadbalancer.server.port=5299"
+    restart: unless-stopped
+  
+  sabnzbd:
+    image: linuxserver/sabnzbd
+    container_name: sabnzbd
+    hostname: sabnzbd
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 8180
+        published: 8080
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Sabnzbd:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/incomplete_downloads
+      - $USERDIR/Services/Shared/Scripts:/Sabnzbd_scripts
+      - $USERDIR/Downloads/nzb_blackhole:/nzb_blackhole
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass - HeadersRegexp NOT WORKING. USING OAUTH CONTAINER BYPASS METHOD.
+      # - "traefik.http.routers.sabnzbd-rtr-bypass.entrypoints=https"
+      # - "traefik.http.routers.sabnzbd-rtr-bypass.tls=true"
+      # - "traefik.http.routers.sabnzbd-rtr-bypass.rule=HeadersRegexp(`X-Forwarded-Uri`, `$SABNZBD_API_KEY`)"
+      # - "traefik.http.routers.sabnzbd-rtr-bypass.priority=100"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.sabnzbd-rtr.entrypoints=https"
+      - "traefik.http.routers.sabnzbd-rtr.tls=true"
+      - "traefik.http.routers.sabnzbd-rtr.rule=Host(`sabnzbd.$DOMAINNAME`)"
+      - "traefik.http.routers.sabnzbd-rtr.priority=99"
+      ## Middlewares
+      # - "traefik.http.routers.sabnzbd-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.sabnzbd-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.sabnzbd-rtr.service=sabnzbd-svc"
+      # - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
+      - "traefik.http.services.sabnzbd-svc.loadbalancer.server.port=8080"
+    restart: unless-stopped
+  
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    hostname: jackett
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 9117
+        published: 9117
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Jackett:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
+      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.jackett-rtr.entrypoints=https"
+      - "traefik.http.routers.jackett-rtr.rule=Host(`jackett.$DOMAINNAME`)"
+      - "traefik.http.routers.jackett-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.jackett-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.jackett-rtr.service=jackett-svc"
+      - "traefik.http.services.jackett-svc.loadbalancer.server.port=9117"
+    restart: unless-stopped
+
+  nzbhydra:
+    image: linuxserver/hydra2
+    container_name: nzbhydra
+    hostname: nzbhydra
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 5076
+        published: 5076
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/NzbHydra:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/downloads
+      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
+      - $USERDIR/Downloads/nzb_blackhole/:/nzb_blackhole
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.hydra-rtr.entrypoints=https"
+      - "traefik.http.routers.hydra-rtr.rule=Host(`nzbhydra.$DOMAINNAME`)"
+      - "traefik.http.routers.hydra-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.hydra-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.hydra-rtr.service=hydra-svc"
+      - "traefik.http.services.hydra-svc.loadbalancer.server.port=5076"
+    restart: unless-stopped
+
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    hostname: plex
+    network_mode: host
+    security_opt: 
+      - no-new-privileges:true
+    # networks:
+    #   - t2_web
+    # ports:
+    #   - target: 32400
+    #     published: 32400
+    #     protocol: tcp
+    #     mode: host
+    #   - target: 32400
+    #     published: 32400
+    #     protocol: udp
+    #     mode: host
+    #   - target: 32469
+    #     published: 32469
+    #     protocol: tcp
+    #     mode: host
+    #   - target: 32469
+    #     published: 32469
+    #     protocol: udp
+    #     mode: host
+    #   - target: 5353 # DLNA
+    #     published: 5353
+    #     protocol: udp
+    #     mode: host
+    #   - target: 1900
+    #     published: 1900
+    #     protocol: udp
+    volumes:
+      - $USERDIR/Services/Plex/config:/config
+      - $THEVAULTDIR/PlexMediaServer/TvShows/:/media/TvShows
+      - $THEVAULTDIR/PlexMediaServer/Movies/:/media/Movies
+      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/movies-4K
+      - $THEVAULTDIR/PlexMediaServer/Music/:/media/Music
+      - $THEVAULTDIR/PlexMediaServer/Anime/:/media/Anime
+      - $THEVAULTDIR/PlexMediaServer/DVR/:/media/DVR
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - VERSION=docker
+      - UMASK_SET=022 #optional
+    # labels:
+    #  - "traefik.enable=true"
+    #  ## HTTP Routers
+    #  - "traefik.http.routers.plex-rtr.entrypoints=https"
+    #  - "traefik.http.routers.plex-rtr.rule=Host(`plex.$DOMAINNAME`)"
+    #  - "traefik.http.routers.plex-rtr.tls=true"
+    #  ## Middlewares
+    #  - "traefik.http.routers.plex-rtr.middlewares=chain-no-auth@file"
+    #  ## HTTP Services
+    #  - "traefik.http.routers.plex-rtr.service=plex-svc"
+    #  - "traefik.http.services.plex-svc.loadbalancer.server.port=32400"
+    restart: unless-stopped
+
+  tautulli:
+    image: linuxserver/tautulli
+    container_name: tautulli
+    hostname: tautulli
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 8181
+        published: 8181
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Tautulli/:/config
+      - $USERDIR/Services/Plex/config/Library/Application Support/Plex Media Server/Logs/:/Plex_logs
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.tautulli-rtr.entrypoints=https"
+      - "traefik.http.routers.tautulli-rtr.rule=Host(`tautulli.$DOMAINNAME`)"
+      - "traefik.http.routers.tautulli-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.tautulli-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.tautulli-rtr.service=tautulli-svc"
+      - "traefik.http.services.tautulli-svc.loadbalancer.server.port=8181"
+    restart: unless-stopped
+
+  # jellyfin:
+  #   image: linuxserver/jellyfin
+  #   container_name: jellyfin
+  #   hostname: jellyfin
+  #   networks:
+  #     - t2_web
+  #   environment:
+  #     - PUID=$PUID
+  #     - PGID=$PGID
+  #     - TZ=$TZ UMASK_SET=022 #optional
+  #   volumes:
+  #     - $USERDIR/Services/Jellyfin/:/config
+  #     - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
+  #     - $THEVAULTDIR/PlexMediaServer/Movies/:/data/movies
+  #     - $THEVAULTDIR/PlexMediaServer/Music/:/data/music
+  #     - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
+  #     - $THEVAULTDIR/PlexMediaServer/DVR/:/data/dvr
+  #   #   - /opt/vc/lib:/opt/vc/lib #optional
+  #   ports:
+  #     - 8096:8096
+  #   #   - 8920:8920 #optional
+  #   devices:
+  #     - /dev/dri:/dev/dri #optional
+  #   #   - /dev/vchiq:/dev/vchiq #optional
+  #   #   - /dev/video10:/dev/video10 #optional
+  #   #   - /dev/video11:/dev/video11 #optional
+  #   #   - /dev/video12:/dev/video12 #optional
+  #   labels:
+  #     - "traefik.enable=true"
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.jellyfin-rtr.entrypoints=https"
+  #     - "traefik.http.routers.jellyfin-rtr.rule=Host(`jellyfin.$DOMAINNAME`)"
+  #     - "traefik.http.routers.jellyfin-rtr.tls=true"
+  #     ## Middlewares
+  #     - "traefik.http.routers.jellyfin-rtr.middlewares=chain-no-auth@file"
+  #     ## HTTP Services
+  #     - "traefik.http.routers.jellyfin-rtr.service=jellyfin-svc"
+  #     - "traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096"
+
+  emby:
+    image: linuxserver/emby
+    container_name: emby
+    hostname: emby
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 8096
+        published: 8096
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ #optional
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Emby/:/config
+      - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
+      - $THEVAULTDIR/PlexMediaServer/Movies/:/data/movies
+      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/data/movies-4K
+      - $THEVAULTDIR/PlexMediaServer/Music/:/data/music
+      - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
+      - $THEVAULTDIR/PlexMediaServer/DVR/:/data/dvr
+      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+      # - $USERDIR/Services/Shared/Scripts/Emby/scripterx-scripts/:/home/bin
+      # - $USERDIR/Services/Shared/Scripts/Emby/scripterx-logs/:/home/logs
+      # - /path/for/transcoding:/transcode #optional
+      # - /opt/vc/lib:/opt/vc/lib #optional
+    devices:
+      - /dev/dri:/dev/dri #for VAAPI HW acceleration - Emby Premiere Only
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.emby-rtr.entrypoints=https"
+      - "traefik.http.routers.emby-rtr.rule=Host(`emby.$DOMAINNAME`)"
+      - "traefik.http.routers.emby-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.emby-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.emby-rtr.service=emby-svc"
+      - "traefik.http.services.emby-svc.loadbalancer.server.port=8096"
+    restart: unless-stopped
+
+  ombi:
+    image: linuxserver/ombi
+    container_name: ombi
+    hostname: ombi
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 3579
+        published: 3579
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Ombi/:/config
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.ombi-rtr.entrypoints=https"
+      - "traefik.http.routers.ombi-rtr.rule=Host(`ombi.$DOMAINNAME`)"
+      - "traefik.http.routers.ombi-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.ombi-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.ombi-rtr.service=ombi-svc"
+      - "traefik.http.services.ombi-svc.loadbalancer.server.port=3579"
+    restart: unless-stopped
+      
+  db:
+    image: mariadb:10.1
+    hostname: filerun_mariadb
+    container_name: filerun_mariadb
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: filerun 
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: filerun_db
+    volumes:
+      - $USERDIR/Services/Filerun/db:/var/lib/mysql
+
+  filerun:
+    image: afian/filerun
+    hostname: filerun
+    container_name: filerun
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 280
+        published: 80
+        protocol: tcp
+        mode: host
+    environment:
+      FR_DB_HOST: db
+      FR_DB_PORT: 3306
+      FR_DB_NAME: filerun_db
+      FR_DB_USER: filerun
+      FR_DB_PASS: password
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_USER_ID: 33
+      APACHE_RUN_GROUP: www-data
+      APACHE_RUN_GROUP_ID: 33
+    depends_on:
+      - db
+    links:
+      - db:db
+    volumes:
+      - $USERDIR/Services/Filerun/html:/var/www/html
+      - $USERDIR/:/user-files
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.filerun-rtr.entrypoints=https"
+      - "traefik.http.routers.filerun-rtr.rule=Host(`filerun.$DOMAINNAME`)"
+      - "traefik.http.routers.filerun-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.filerun-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.filerun-rtr.service=filerun-svc"
+      - "traefik.http.services.filerun-svc.loadbalancer.server.port=80"
+    restart: unless-stopped
+
+  # netdata:
+  #   image: netdata/netdata
+  #   hostname: netdata.$DOMAINNAME
+  #   container_name: netdata
+  #   depends_on:
+  #     - dockerproxy
+  #   networks:
+  #     - t2_proxy
+  #     - t2_web
+  #   ports:
+  #     - 19999:19999
+  #     # - 4242:4242 #for opentsdb backend
+  #   cap_add:
+  #     - SYS_PTRACE
+  #     - SYS_ADMIN
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   volumes:
+  #     - /etc/passwd:/host/etc/passwd:ro
+  #     - /etc/group:/host/etc/group:ro
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /etc/os-release:/host/etc/os-release:ro
+  #     - /var/log/smartd:/var/log/smartd
+  #     - $USERDIR/Services/Monitoring/netdata/config/netdata.conf:/etc/netdata/netdata.conf
+  #     - $USERDIR/Services/Monitoring/netdata/config/traefik.conf:/etc/netdata/python.d/traefik.conf
+  #     - $USERDIR/Services/Monitoring/netdata/config/smartd_log.conf:/etc/netdata/python.d/smartd_log.conf
+  #   environment:
+  #     - DOCKER_HOST=dockerproxy:2375
+  #     - TZ=$TZ
+  #     - PGID=$PGID
+  #   #  labels:
+  #   #    - "traefik.enable=true"
+  #   #    ## HTTP Routers
+  #   #    - "traefik.http.routers.netdata-rtr.entrypoints=https"
+  #   #    - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
+  #   #    - "traefik.http.routers.netdata-rtr.tls=true"
+  #   #    ## Middlewares
+  #   #    - "traefik.http.routers.netdata-rtr.middlewares=chain-authelia@file"
+  #   #    ## HTTP Services
+  #   #    - "traefik.http.routers.netdata-rtr.service=netdata-svc"
+  #   #    - "traefik.http.services.netdata-svc.loadbalancer.server.port=19999"
+  #   restart: unless-stopped
+
+  heimdall:
+    image: linuxserver/heimdall
+    container_name: heimdall
+    hostname: heimdall
+    networks:
+      - t2_web
+    security_opt: 
+      - no-new-privileges:true
+    ports:
+      - target: 180
+        published: 80
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    volumes:
+      - $USERDIR/Services/Heimdall/:/config
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.heimdall-rtr.entrypoints=https"
+      - "traefik.http.routers.heimdall-rtr.rule=Host(`dashboard.$DOMAINNAME`)"
+      - "traefik.http.routers.heimdall-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.heimdall-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.heimdall-rtr.service=heimdall-svc"
+      - "traefik.http.services.heimdall-svc.loadbalancer.server.port=80"
+    restart: unless-stopped
