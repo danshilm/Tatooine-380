@@ -1,0 +1,15 @@
+[http.routers]
+  [http.routers.netdata-rtr]
+      entryPoints = ["https"]
+      rule = "Host(`netdata.example.com`)"
+      service = "netdata-svc"
+      middlewares = ["chain-authelia"]
+      [http.routers.netdata-rtr.tls]
+
+[http.services]
+  [http.services.netdata-svc]
+    [http.services.netdata-svc.loadBalancer]
+      passHostHeader = true
+      [[http.services.netdata-svc.loadBalancer.servers]]
+        # change to IP of netdata host machine
+        url = "http://192.168.100.1:19999"

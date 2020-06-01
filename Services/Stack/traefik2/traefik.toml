@@ -1,0 +1,50 @@
+[serversTransport]
+  maxIdleConnsPerHost = 0
+  checkNewVersion = false
+  sendAnonymousUsage = false
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+    [entryPoints.https.forwardedHeaders]
+      # cloudflare IPs
+      trustedIPs = ["173.245.48.0/20", "103.21.244.0/22", "103.22.200.0/22", "103.31.4.0/22", "141.101.64.0/18", "108.162.192.0/18", "190.93.240.0/20", "188.114.96.0/20", "197.234.240.0/22", "198.41.128.0/17", "162.158.0.0/15", "104.16.0.0/12", "172.64.0.0/13", "131.0.72.0/22"]
+  [entryPoints.traefik]
+    address = ":8080"
+
+[providers]
+  providersThrottleDuration = "2s"
+  [providers.docker]
+    watch = true
+    exposedByDefault = false
+    swarmMode = false
+    endpoint = "tcp://dockerproxy:2375"
+    network = "t2_proxy"
+  [providers.file]
+    directory = "/rules"
+    filename = "/"
+    watch = true
+
+[api]
+  dashboard = true
+
+[log]
+  level = "DEBUG"
+
+[accessLog]
+  filePath = "/traefik.log"
+  bufferingSize = 100
+  [accessLog.filters]
+    statusCodes = "400-499"
+
+[certificatesResolvers]
+  [certificatesResolvers.default]
+    [certificatesResolvers.default.acme]
+      email = "email@provider.com"
+      storage = "acme.json"
+      [certificatesResolvers.default.acme.dnsChallenge]
+        provider = "cloudflare"
+        # had to set to around 30s the first time
+        delayBeforeCheck = "0s"
