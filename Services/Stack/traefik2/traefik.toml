@@ -1,7 +1,9 @@
-[serversTransport]
-  maxIdleConnsPerHost = 0
+[global]
   checkNewVersion = false
   sendAnonymousUsage = false
+
+[serversTransport]
+  maxIdleConnsPerHost = 0
 
 [entryPoints]
   [entryPoints.http]

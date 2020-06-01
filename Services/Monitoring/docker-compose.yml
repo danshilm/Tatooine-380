@@ -1,4 +1,4 @@
-version: '3'
+version: "3.7"
 
 services:
   grafana:
@@ -6,12 +6,15 @@ services:
     container_name: grafana
     hostname: grafana
     networks:
-      - web
+      - t2_web
     user: "1000"
     ports:
-      - 3100:3000
+      - target: 3000
+        published: 3100
+        protocol: tcp
+        mode: host
     volumes:
-      - /home/user/Services/Monitoring/grafana:/config
+      - $USERDIR/Services/Monitoring/grafana:/config
     environment:
       - GF_PATHS_DATA=/config/data
       - GF_PATHS_LOGS=/config/logs
@@ -22,34 +25,64 @@ services:
       - varken
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=grafana"
-      - "traefik.frontend.rule=Host:grafana.domain.com"
-      - "traefik.docker.network=web"
-      - "traefik.port=3000"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=domain.com"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.customFrameOptionsValue=allow-from https:domain.com"
-      - "traefik.frontend.headers.referrerPolicy=strict-origin"
-      - "traefik.frontend.headers.contentSecurityPolicy=default-src https: 'unsafe-inline' 'unsafe-eval'"
+      ## HTTP Routers
+      - "traefik.http.routers.grafana-rtr.entrypoints=https"
+      - "traefik.http.routers.grafana-rtr.rule=Host(`grafana.$DOMAINNAME`)"
+      - "traefik.http.routers.grafana-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.grafana-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.grafana-rtr.service=grafana-svc"
+      - "traefik.http.services.grafana-svc.loadbalancer.server.port=3000"
     restart: unless-stopped
+
+    # prometheus:
+  #   image: prom/prometheus
+  #   container_name: prometheus
+  #   hostname: prometheus
+  #   networks:
+  #     - t2_web
+  #   user: "65534"
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   ports:
+  #     - target: 9090
+  #       published: 9190
+  #       protocol: tcp
+  #       mode: host
+  #   volumes:
+  #     - $USERDIR/Services/Monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   labels:
+  #     - "traefik.enable=true"
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.prometheus-rtr.entrypoints=https"
+  #     - "traefik.http.routers.prometheus-rtr.rule=Host(`prometheus.$DOMAINNAME`)"
+  #     - "traefik.http.routers.prometheus-rtr.tls=true"
+  #     ## Middlewares
+  #     - "traefik.http.routers.prometheus-rtr.middlewares=chain-authelia@file"
+  #     ## HTTP Services
+  #     - "traefik.http.routers.prometheus-rtr.service=prometheus-svc"
+  #     - "traefik.http.services.prometheus-svc.loadbalancer.server.port=9090"
+  #   restart: unless-stopped
 
   influxdb:
     image: influxdb
     container_name: influxdb
     hostname: influxdb
     networks:
-      - web
+      - t2_web
     ports:
-      - 8086:8086
+      - target: 8086
+        published: 8086
+        protocol: tcp
+        mode: host
+      - target: 4242 # for opentsdb to be able to get metrics from netdata
+        published: 4242
+        protocol: tcp
+        mode: host
     volumes:
-      - /home/user/Services/Monitoring/influxdb:/var/lib/influxdb
-      - /home/user/Services/Monitoring/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - $USERDIR/Services/Monitoring/influxdb:/var/lib/influxdb
+      - $USERDIR/Services/Monitoring/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     restart: unless-stopped
 
   varken:
@@ -58,9 +91,9 @@ services:
     image: boerderij/varken
     # user: "1000"
     networks:
-      - web
+      - t2_web
     volumes:
-      - /home/user/Services/Monitoring/varken:/config
+      - $USERDIR/Services/Monitoring/varken:/config
     environment:
       - TZ=Indian/Mauritius
     depends_on:
@@ -72,13 +105,13 @@ services:
     container_name: speedtest
     hostname: speedtest
     networks:
-      - web
+      - t2_web
     volumes:
-      - /home/user/Services/Monitoring/speedtest/config.ini:/src/config.ini
+      - $USERDIR/Services/Monitoring/speedtest/config.ini:/src/config.ini
     depends_on:
       - influxdb
     restart: unless-stopped
 
 networks:
-  web:
+  t2_web:
     external: true
