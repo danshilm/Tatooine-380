@@ -96,7 +96,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Authelia/authelia:/var/lib/authelia
+      - $USERDIR/Services/Authelia/lib:/var/lib/authelia
       - $USERDIR/Services/Authelia/configuration.yml:/etc/authelia/configuration.yml:ro
       - $USERDIR/Services/Authelia/users_database.yml:/etc/authelia/users_database.yml
       # - $USERDIR/Services/Authelia/notification.txt:/tmp/authelia/notification.txt
@@ -122,13 +122,13 @@ services:
     command: -d
     security_opt: 
       - no-new-privileges:true
+      - label:disable
     cap_add:
       - NET_ADMIN
     stdin_open: true
     tty: true
     networks:
       - t2_web
-      - label:disable
     ports:
       - target: 8100
         published: 8100
@@ -700,12 +700,12 @@ services:
     container_name: filerun
     security_opt: 
       - no-new-privileges:true
-      depends_on:
-        - db
-    networks:
-      - t2_web
+    depends_on:
+      - db
     links:
       - db:db
+    networks:
+      - t2_web
     ports:
       - target: 80
         published: 280
