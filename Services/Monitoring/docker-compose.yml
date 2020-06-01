@@ -19,7 +19,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Monitoring/grafana/config:/config
+      - $USERDIR/Services/Monitoring/grafana/:/config
     environment:
       - GF_PATHS_DATA=/config/data
       - GF_PATHS_LOGS=/config/logs
@@ -101,7 +101,7 @@ services:
     networks:
       - t2_web
     volumes:
-      - $USERDIR/Services/Monitoring/varken/config:/config
+      - $USERDIR/Services/Monitoring/varken/:/config
     environment:
       - TZ=Indian/Mauritius
     restart: unless-stopped
