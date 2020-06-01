@@ -180,7 +180,8 @@ services:
       - "traefik.http.routers.qbittorrent-rtr.rule=Host(`qbit.$DOMAINNAME`)"
       - "traefik.http.routers.qbittorrent-rtr.tls=true"
       ## Middlewares
-      - "traefik.http.routers.qbittorrent-rtr.middlewares=chain-authelia@file"
+      # it is not possible to disable authentication for the webUI of qbit, however, I disabled CSRF since it caused some white screen issues
+      - "traefik.http.routers.qbittorrent-rtr.middlewares=chain-no-auth@file"
       ## HTTP Services
       - "traefik.http.routers.qbittorrent-rtr.service=qbittorrent-svc"
       - "traefik.http.services.qbittorrent-svc.loadbalancer.server.port=8100"
@@ -370,13 +371,13 @@ services:
       - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/Sabnzbd:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/incomplete_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/downloads/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/downloads/incomplete_downloads
       - $USERDIR/Services/Shared/Scripts:/Sabnzbd_scripts
       - $USERDIR/Downloads/nzb_blackhole:/nzb_blackhole
     labels:
       - "traefik.enable=true"
-      ## HTTP Routers Auth Bypass - HeadersRegexp NOT WORKING. USING OAUTH CONTAINER BYPASS METHOD.
+      ## Not working with Nzb360
       # - "traefik.http.routers.sabnzbd-rtr-bypass.entrypoints=https"
       # - "traefik.http.routers.sabnzbd-rtr-bypass.tls=true"
       # - "traefik.http.routers.sabnzbd-rtr-bypass.rule=HeadersRegexp(`X-Forwarded-Uri`, `$SABNZBD_API_KEY`)"
@@ -388,7 +389,7 @@ services:
       - "traefik.http.routers.sabnzbd-rtr.priority=99"
       ## Middlewares
       # - "traefik.http.routers.sabnzbd-rtr-bypass.middlewares=chain-no-auth@file"
-      - "traefik.http.routers.sabnzbd-rtr.middlewares=chain-authelia@file"
+      - "traefik.http.routers.sabnzbd-rtr.middlewares=chain-no-auth@file"
       ## HTTP Services
       - "traefik.http.routers.sabnzbd-rtr.service=sabnzbd-svc"
       # - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
