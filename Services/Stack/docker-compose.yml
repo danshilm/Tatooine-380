@@ -113,7 +113,7 @@ services:
       ## HTTP Services
       - "traefik.http.routers.authelia-rtr.service=authelia-svc"
       - "traefik.http.services.authelia-svc.loadbalancer.server.port=9091"
-    restart: always
+    restart: unkess-stopped
 
   vpn:
     image: dperson/openvpn-client
@@ -153,8 +153,8 @@ services:
     restart: unless-stopped
 
   qbittorrent:
-    image: "linuxserver/qbittorrent"
-    container_name: "qbittorrent"
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
     depends_on: 
       - vpn
     network_mode: "service:vpn"
@@ -359,8 +359,8 @@ services:
     security_opt: 
       - no-new-privileges:true
     ports:
-      - target: 8180
-        published: 8080
+      - target: 8080
+        published: 8180
         protocol: tcp
         mode: host
     environment:
@@ -703,8 +703,8 @@ services:
     security_opt: 
       - no-new-privileges:true
     ports:
-      - target: 280
-        published: 80
+      - target: 80
+        published: 280
         protocol: tcp
         mode: host
     environment:
@@ -790,8 +790,8 @@ services:
     security_opt: 
       - no-new-privileges:true
     ports:
-      - target: 180
-        published: 80
+      - target: 80
+        published: 180
         protocol: tcp
         mode: host
     environment:
