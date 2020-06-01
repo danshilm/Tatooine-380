@@ -5,24 +5,26 @@ services:
     image: grafana/grafana
     container_name: grafana
     hostname: grafana
+    user: "1000"
+    security_opt:
+      - no-new-privileges:true=
+    depends_on:
+      - influxdb
+      - varken
     networks:
       - t2_web
-    user: "1000"
     ports:
       - target: 3000
         published: 3100
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Monitoring/grafana:/config
+      - $USERDIR/Services/Monitoring/grafana/config:/config
     environment:
       - GF_PATHS_DATA=/config/data
       - GF_PATHS_LOGS=/config/logs
       - GF_PATHS_PLUGINS=/config/plugins
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
-    depends_on:
-      - influxdb
-      - varken
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -36,15 +38,15 @@ services:
       - "traefik.http.services.grafana-svc.loadbalancer.server.port=3000"
     restart: unless-stopped
 
-    # prometheus:
+  # prometheus:
   #   image: prom/prometheus
   #   container_name: prometheus
   #   hostname: prometheus
-  #   networks:
-  #     - t2_web
   #   user: "65534"
   #   security_opt:
   #     - no-new-privileges:true
+  #   networks:
+  #     - t2_web
   #   ports:
   #     - target: 9090
   #       published: 9190
@@ -69,6 +71,8 @@ services:
     image: influxdb
     container_name: influxdb
     hostname: influxdb
+    security_opt:
+      - no-new-privileges:true
     networks:
       - t2_web
     ports:
@@ -81,7 +85,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Monitoring/influxdb:/var/lib/influxdb
+      - $USERDIR/Services/Monitoring/influxdb/lib:/var/lib/influxdb
       - $USERDIR/Services/Monitoring/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     restart: unless-stopped
 
@@ -90,26 +94,30 @@ services:
     container_name: varken
     image: boerderij/varken
     # user: "1000"
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - influxdb
     networks:
       - t2_web
     volumes:
-      - $USERDIR/Services/Monitoring/varken:/config
+      - $USERDIR/Services/Monitoring/varken/config:/config
     environment:
       - TZ=Indian/Mauritius
-    depends_on:
-      - influxdb
     restart: unless-stopped
 
   speedtest:
     image: atribe/speedtest-for-influxdb-and-grafana
     container_name: speedtest
     hostname: speedtest
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - influxdb
     networks:
       - t2_web
     volumes:
       - $USERDIR/Services/Monitoring/speedtest/config.ini:/src/config.ini
-    depends_on:
-      - influxdb
     restart: unless-stopped
 
 networks:

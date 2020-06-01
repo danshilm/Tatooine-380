@@ -27,13 +27,13 @@ services:
     image: traefik:v2.2
     container_name: traefik2
     hostname: traefik2
+    security_opt:
+      - no-new-privileges:true
+    depends_on: 
+      - dockerproxy
     networks:
       - t2_proxy
       - t2_web
-    depends_on: 
-      - dockerproxy
-    security_opt:
-      - no-new-privileges:true
     ports:
       # https://www.reddit.com/r/docker/comments/c1wrep/traefik_reverse_proxy_question_docker_overlay/
       - target: 80
@@ -86,10 +86,10 @@ services:
     image: authelia/authelia:latest
     container_name: authelia
     hostname: authelia
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 9091
         published: 9091
@@ -120,10 +120,14 @@ services:
     container_name: vpn
     hostname: vpn
     command: -d
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    cap_add:
+      - NET_ADMIN
+    stdin_open: true
+    tty: true
+    networks:
+      - t2_web
       - label:disable
     ports:
       - target: 8100
@@ -138,15 +142,11 @@ services:
         published: 6881
         protocol: udp
         mode: host
-    cap_add:
-      - NET_ADMIN
-    environment:
-      - TZ=$TZ
     volumes:
       - $USERDIR/Services/OpenVPN/vpn:/vpn
       - /dev/net:/dev/net:z
-    stdin_open: true
-    tty: true
+    environment:
+      - TZ=$TZ
     tmpfs:
       - /run
       - /tmp
@@ -155,13 +155,13 @@ services:
   qbittorrent:
     image: linuxserver/qbittorrent
     container_name: qbittorrent
-    depends_on: 
-      - vpn
-    network_mode: "service:vpn"
     security_opt: 
       - no-new-privileges:true
     stdin_open: true
     tty: true
+    depends_on: 
+      - vpn
+    network_mode: "service:vpn"
     volumes:
       - $USERDIR/Services/qBitTorrent/:/config
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
@@ -191,26 +191,26 @@ services:
     image: linuxserver/radarr
     container_name: radarr
     hostname: radarr
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 7878
         published: 7878
         protocol: tcp
         mode: host
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/Radarr/:/config
       - $THEVAULTDIR/PlexMediaServer/Movies/:/movies
       - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/movies-4K
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/completed_downloads
       - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -236,26 +236,26 @@ services:
     image: linuxserver/sonarr
     container_name: sonarr
     hostname: sonarr
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 8989
         published: 8989
         protocol: tcp
         mode: host
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/Sonarr/:/config
       - $THEVAULTDIR/PlexMediaServer/TvShows/:/TvShows
       - $THEVAULTDIR/PlexMediaServer/Anime/:/Anime
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/completed_downloads
       - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -281,26 +281,26 @@ services:
     image: linuxserver/bazarr
     container_name: bazarr
     hostname: bazarr
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 6767
         published: 6767
         protocol: tcp
         mode: host
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/Bazarr/:/config
       - $THEVAULTDIR/PlexMediaServer/Movies/:/Movies
       - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/movies-4K
       - $THEVAULTDIR/PlexMediaServer/TvShows/:/TvShows
       - $THEVAULTDIR/PlexMediaServer/Anime/:/Anime
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -318,26 +318,26 @@ services:
     image: linuxserver/lazylibrarian
     container_name: lazylibrarian
     hostname: lazylibrarian
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 5299
         published: 5299
         protocol: tcp
         mode: host
+    volumes:
+      - $USERDIR/Services/LazyLibrarian/:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/downloads
+      - $THEVAULTDIR/PlexMediaServer/Readables/Books/:/books
+      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks/:/audiobooks
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
       - UMASK_SET=022 #optional
       # - DOCKER_MODS=linuxserver/calibre-web:calibre #optional
-    volumes:
-      - $USERDIR/Services/LazyLibrarian/:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/downloads
-      - $THEVAULTDIR/PlexMediaServer/Readables/Books/:/books
-      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks/:/audiobooks
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -355,26 +355,26 @@ services:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
     hostname: sabnzbd
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 8080
         published: 8180
         protocol: tcp
         mode: host
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/Sabnzbd:/config
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/downloads/completed_downloads
       - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/downloads/incomplete_downloads
       - $USERDIR/Services/Shared/Scripts:/Sabnzbd_scripts
       - $USERDIR/Downloads/nzb_blackhole:/nzb_blackhole
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
       ## Not working with Nzb360
@@ -400,24 +400,24 @@ services:
     image: linuxserver/jackett
     container_name: jackett
     hostname: jackett
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 9117
         published: 9117
         protocol: tcp
         mode: host
+    volumes:
+      - $USERDIR/Services/Jackett:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
+      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
       - UMASK_SET=022 #optional
-    volumes:
-      - $USERDIR/Services/Jackett:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/completed_downloads
-      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -435,25 +435,25 @@ services:
     image: linuxserver/hydra2
     container_name: nzbhydra
     hostname: nzbhydra
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 5076
         published: 5076
         protocol: tcp
         mode: host
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/NzbHydra:/config
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/downloads
       - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
       - $USERDIR/Downloads/nzb_blackhole/:/nzb_blackhole
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -471,9 +471,9 @@ services:
     image: linuxserver/plex
     container_name: plex
     hostname: plex
-    network_mode: host
     security_opt: 
       - no-new-privileges:true
+    network_mode: host
     # networks:
     #   - t2_web
     # ports:
@@ -531,23 +531,23 @@ services:
     image: linuxserver/tautulli
     container_name: tautulli
     hostname: tautulli
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 8181
         published: 8181
         protocol: tcp
         mode: host
+    volumes:
+      - $USERDIR/Services/Tautulli/:/config
+      - $USERDIR/Services/Plex/config/Library/Application Support/Plex Media Server/Logs/:/Plex_logs
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
       - UMASK_SET=022 #optional
-    volumes:
-      - $USERDIR/Services/Tautulli/:/config
-      - $USERDIR/Services/Plex/config/Library/Application Support/Plex Media Server/Logs/:/Plex_logs
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -567,10 +567,8 @@ services:
   #   hostname: jellyfin
   #   networks:
   #     - t2_web
-  #   environment:
-  #     - PUID=$PUID
-  #     - PGID=$PGID
-  #     - TZ=$TZ UMASK_SET=022 #optional
+  #   ports:
+  #     - 8096:8096
   #   volumes:
   #     - $USERDIR/Services/Jellyfin/:/config
   #     - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
@@ -579,15 +577,16 @@ services:
   #     - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
   #     - $THEVAULTDIR/PlexMediaServer/DVR/:/data/dvr
   #   #   - /opt/vc/lib:/opt/vc/lib #optional
-  #   ports:
-  #     - 8096:8096
-  #   #   - 8920:8920 #optional
   #   devices:
   #     - /dev/dri:/dev/dri #optional
   #   #   - /dev/vchiq:/dev/vchiq #optional
   #   #   - /dev/video10:/dev/video10 #optional
   #   #   - /dev/video11:/dev/video11 #optional
   #   #   - /dev/video12:/dev/video12 #optional
+  #   environment:
+  #     - PUID=$PUID
+  #     - PGID=$PGID
+  #     - TZ=$TZ UMASK_SET=022 #optional
   #   labels:
   #     - "traefik.enable=true"
   #     ## HTTP Routers
@@ -604,20 +603,15 @@ services:
     image: linuxserver/emby
     container_name: emby
     hostname: emby
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 8096
         published: 8096
         protocol: tcp
         mode: host
-    environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ #optional
-      - UMASK_SET=022 #optional
     volumes:
       - $USERDIR/Services/Emby/:/config
       - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
@@ -633,6 +627,11 @@ services:
       # - /opt/vc/lib:/opt/vc/lib #optional
     devices:
       - /dev/dri:/dev/dri #for VAAPI HW acceleration - Emby Premiere Only
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ #optional
+      - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -650,22 +649,22 @@ services:
     image: linuxserver/ombi
     container_name: ombi
     hostname: ombi
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 3579
         published: 3579
         protocol: tcp
         mode: host
+    volumes:
+      - $USERDIR/Services/Ombi/:/config
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
       - UMASK_SET=022 #optional
-    volumes:
-      - $USERDIR/Services/Ombi/:/config
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -683,31 +682,38 @@ services:
     image: mariadb:10.1
     hostname: filerun_mariadb
     container_name: filerun_mariadb
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
+    volumes:
+      - $USERDIR/Services/Filerun/db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: filerun 
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: filerun_db
-    volumes:
-      - $USERDIR/Services/Filerun/db:/var/lib/mysql
 
   filerun:
     image: afian/filerun
     hostname: filerun
     container_name: filerun
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+      depends_on:
+        - db
+    networks:
+      - t2_web
+    links:
+      - db:db
     ports:
       - target: 80
         published: 280
         protocol: tcp
         mode: host
+    volumes:
+      - $USERDIR/Services/Filerun/html:/var/www/html
+      - $USERDIR/:/user-files
     environment:
       FR_DB_HOST: db
       FR_DB_PORT: 3306
@@ -718,13 +724,6 @@ services:
       APACHE_RUN_USER_ID: 33
       APACHE_RUN_GROUP: www-data
       APACHE_RUN_GROUP_ID: 33
-    depends_on:
-      - db
-    links:
-      - db:db
-    volumes:
-      - $USERDIR/Services/Filerun/html:/var/www/html
-      - $USERDIR/:/user-files
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -742,6 +741,11 @@ services:
   #   image: netdata/netdata
   #   hostname: netdata.$DOMAINNAME
   #   container_name: netdata
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   cap_add:
+  #     - SYS_PTRACE
+  #     - SYS_ADMIN
   #   depends_on:
   #     - dockerproxy
   #   networks:
@@ -749,12 +753,7 @@ services:
   #     - t2_web
   #   ports:
   #     - 19999:19999
-  #     # - 4242:4242 #for opentsdb backend
-  #   cap_add:
-  #     - SYS_PTRACE
-  #     - SYS_ADMIN
-  #   security_opt:
-  #     - apparmor:unconfined
+  #     - 4242:4242 #for opentsdb backend
   #   volumes:
   #     - /etc/passwd:/host/etc/passwd:ro
   #     - /etc/group:/host/etc/group:ro
@@ -769,39 +768,39 @@ services:
   #     - DOCKER_HOST=dockerproxy:2375
   #     - TZ=$TZ
   #     - PGID=$PGID
-  #   #  labels:
-  #   #    - "traefik.enable=true"
-  #   #    ## HTTP Routers
-  #   #    - "traefik.http.routers.netdata-rtr.entrypoints=https"
-  #   #    - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
-  #   #    - "traefik.http.routers.netdata-rtr.tls=true"
-  #   #    ## Middlewares
-  #   #    - "traefik.http.routers.netdata-rtr.middlewares=chain-authelia@file"
-  #   #    ## HTTP Services
-  #   #    - "traefik.http.routers.netdata-rtr.service=netdata-svc"
-  #   #    - "traefik.http.services.netdata-svc.loadbalancer.server.port=19999"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.netdata-rtr.entrypoints=https"
+  #     - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
+  #     - "traefik.http.routers.netdata-rtr.tls=true"
+  #     ## Middlewares
+  #     - "traefik.http.routers.netdata-rtr.middlewares=chain-authelia@file"
+  #     ## HTTP Services
+  #     - "traefik.http.routers.netdata-rtr.service=netdata-svc"
+  #     - "traefik.http.services.netdata-svc.loadbalancer.server.port=19999"
   #   restart: unless-stopped
 
   heimdall:
     image: linuxserver/heimdall
     container_name: heimdall
     hostname: heimdall
-    networks:
-      - t2_web
     security_opt: 
       - no-new-privileges:true
+    networks:
+      - t2_web
     ports:
       - target: 80
         published: 180
         protocol: tcp
         mode: host
+    volumes:
+      - $USERDIR/Services/Heimdall/:/config
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
       - UMASK_SET=022 #optional
-    volumes:
-      - $USERDIR/Services/Heimdall/:/config
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
