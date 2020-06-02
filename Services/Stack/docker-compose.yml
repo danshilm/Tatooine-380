@@ -181,7 +181,7 @@ services:
       - "traefik.http.routers.qbittorrent-rtr.tls=true"
       ## Middlewares
       # it is not possible to disable authentication for the webUI of qbit, however, I disabled CSRF since it caused some white screen issues
-      - "traefik.http.routers.qbittorrent-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.qbittorrent-rtr.middlewares=middlewares-rate-limit@file"
       ## HTTP Services
       - "traefik.http.routers.qbittorrent-rtr.service=qbittorrent-svc"
       - "traefik.http.services.qbittorrent-svc.loadbalancer.server.port=8100"
