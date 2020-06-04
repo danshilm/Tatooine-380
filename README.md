@@ -9,3 +9,4 @@ TODO:
 - [ ] Adapt [guillaumebriday/traefik-custom-error-pages](https://github.com/guillaumebriday/traefik-custom-error-pages) for Traefik:v2.2 (refer to [this example](https://github.com/jamescurtin/traefik-proxy) on how to be clean)
 - [ ] Move sensitive stuff to docker secrets instead of .env
 - [X] Add netdata
+- [ ] Standardize folders so that Sonarr/Radarr don't think they are moving files across different drives - refer to [avoid common pitfalls](https://sonarr.tv/#downloads-v3-docker)
