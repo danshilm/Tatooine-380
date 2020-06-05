@@ -1,0 +1,1 @@
+This folder needs to be empty when exporting from TMM, else it won't export to this directory

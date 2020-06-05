@@ -8,4 +8,4 @@ For dockerd, refer to their [manual](https://learn.netdata.cloud/docs/agent/coll
 
 For smartd, refer to their [manual](https://learn.netdata.cloud/docs/agent/collectors/python.d.plugin/smartd_log).
 
-For traefik, refer to their [manual](https://learn.netdata.cloud/docs/agent/collectors/python.d.plugin/traefik/).
+For traefik, refer to their [manual](https://learn.netdata.cloud/docs/agent/collectors/python.d.plugin/traefik/). (NOTE: does NOT work for Traefik v2)

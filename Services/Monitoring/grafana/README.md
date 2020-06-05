@@ -4,3 +4,5 @@ This how it looks like:
 ![Image of Grafana dashboard](https://i.redd.it/nmpphi8alet41.png)
 
 I did make some changes to my personal setup though, like grabbing the metrics from Netdata's InfluxDB database instead of using Telegraf.
+
+NOTE: To remove Grafana authentication and let Authelia handle it, look [here](https://grafana.com/docs/grafana/latest/auth/auth-proxy/).

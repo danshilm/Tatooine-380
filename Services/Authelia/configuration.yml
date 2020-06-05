@@ -1,0 +1,119 @@
+###############################################################
+#                   Authelia configuration                    #
+###############################################################
+
+host: 0.0.0.0
+port: 9091
+log_level: info
+
+# This secret can also be set using the env variables AUTHELIA_JWT_SECRET_FILE
+# I used this site to generate the secret: https://www.grc.com/passwords.htm
+jwt_secret: REQUIRED
+
+# https://docs.authelia.com/configuration/miscellaneous.html#default-redirection-url
+default_redirection_url: https://homepage.domain.tld
+
+totp:
+  issuer: authelia.com
+  period: 30
+  skew: 1
+
+# Enable the following for Duo Push Notification support
+#duo_api:
+#  hostname: api-123456789.example.com
+#  integration_key: ABCDEF
+#  # This secret can also be set using the env variables AUTHELIA_DUO_API_SECRET_KEY_FILE
+#  secret_key: 1234567890abcdefghifjkl
+
+authentication_backend:
+  file:
+    path: /etc/authelia/users_database.yml
+    # customize passwords based on https://docs.authelia.com/configuration/authentication/file.html
+    password:
+      algorithm: argon2id
+      iterations: 1
+      salt_length: 16
+      parallelism: 8
+      memory: 1024
+
+# https://docs.authelia.com/configuration/access-control.html
+access_control:
+  default_policy: deny
+  rules:
+    # Rules applied to everyone
+    - domain: auth.domain.tld
+      policy: bypass   
+    - domain: "*.domain.tld"
+      policy: one_factor
+      # two_factor would be preffered
+
+session:
+  # The name of the session cookie. (default: authelia_session).
+  name: authelia_session
+
+  # The secret to encrypt the session cookie.
+  # Secret can also be set using a secret: https://docs.authelia.com/configuration/secrets.html
+  secret: REQUIRED
+
+  # The time in seconds before the cookie expires and session is reset.
+  expiration: 1h
+
+  # The inactivity time in seconds before the session is reset.
+  inactivity: 5m
+
+  # The remember me duration.
+  # Value of 0 disables remember me.
+  # Value is in seconds, or duration notation. See: https://docs.authelia.com/configuration/index.html#duration-notation-format
+  # Longer periods are considered less secure because a stolen cookie will last longer giving attackers more time to spy
+  # or attack. Currently the default is 1M or 1 month.
+  remember_me_duration:  1M
+
+  # The domain to protect.
+  # Note: the login portal must also be a subdomain of that domain.
+  domain: domain.tld
+
+# Optional. Can improve performance on a busy system.
+#  redis:
+#    host: redis
+#    port: 6379
+    # This secret can also be set using the env variables AUTHELIA_SESSION_REDIS_PASSWORD_FILE
+    # password: authelia
+
+regulation:
+  # The number of failed login attempts before user is banned.
+  # Set it to 0 to disable regulation.
+  max_retries: 5
+
+  # The time range during which the user can attempt login before being banned.
+  # The user is banned if the authentication failed `max_retries` times in a `find_time` seconds window.
+  # Find Time accepts duration notation. See: https://docs.authelia.com/configuration/index.html#duration-notation-format
+  find_time: 2m
+
+  # The length of time before a banned user can sign in again.
+  # Find Time accepts duration notation. See: https://docs.authelia.com/configuration/index.html#duration-notation-format
+  ban_time: 5m
+
+storage:
+# For local storage, uncomment lines below and comment out mysql. https://docs.authelia.com/configuration/storage/sqlite.html
+ local:
+   path: /var/lib/authelia/db.sqlite3
+#   mysql:
+#   # MySQL allows running multiple authelia instances. Create database and enter details below.
+#     host: MYSQL_HOST
+#     port: 3306
+#     database: authelia
+#     username: DBUSERNAME
+#     # Password can also be set using a secret: https://docs.authelia.com/configuration/secrets.html
+#     password: DBPASSWORD
+
+notifier:
+#   smtp:
+#     username: SMTP_USERNAME
+#     # This secret can also be set using the env variables AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE
+#     password: SMTP_PASSWORD
+#     host: SMTP_HOST
+#     port: 587 #465
+#     sender: SENDER_EMAIL
+#   For testing purpose, notifications can be sent in a file. Be sure map the volume in docker-compose.
+ filesystem:
+   filename: /tmp/authelia/notification.txt

@@ -1,0 +1,16 @@
+###############################################################
+#                         Users Database                      #
+###############################################################
+
+# This file can be used if you do not have an LDAP set up.
+# Create new hashed password: docker run authelia/authelia:latest authelia hash-password <new_password>
+# https://docs.authelia.com/configuration/authentication/file.html
+
+# List of users
+users:
+#   USERNAME:
+#     password: "HASHED_PASSWORD"
+#     email: USER_EMAIL
+#     groups:
+#       - admins
+#       - dev

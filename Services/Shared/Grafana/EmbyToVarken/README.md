@@ -14,7 +14,7 @@ The `.service` file for my system looks like this:
 Description=Fills current streams tab in Grafana dashboard
 
 [Service]
-ExecStart=/usr/bin/python3 /home/user/Services/cron/EmbyToVarken/script.py
+ExecStart=/usr/bin/python3 /home/user/Services/Shared/Grafana/EmbyToVarken/script.py
 ```
 
 and the `.timer` file looks like this:
