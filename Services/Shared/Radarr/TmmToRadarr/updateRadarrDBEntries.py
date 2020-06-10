@@ -30,6 +30,9 @@ def getMoviesData():
         reader = csv.reader(infile)
         allMoviesData = []
         for line in reader:
+            # ignore line separator and last empty line
+            if line[0] == 'sep=' or not line[0]:
+                continue
             # I have a directory only for 4K movies that I don't share on Plex but use TMM to manage them, so they show up in the exported list if I mis-select when exporting in TMM
             # this is just a safeguard 
             if "/media/TheVault/PlexMediaServer/Movies-4K/" in line[2]:
