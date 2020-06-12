@@ -27,7 +27,7 @@ def getMoviesData():
     allMoviesData = []
 
     with open(file_path, mode='r') as infile:
-        reader = csv.reader(infile)
+        reader = csv.reader(infile, delimiter='|')
         allMoviesData = []
         for line in reader:
             # ignore line separator and last empty line
