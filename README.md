@@ -1,6 +1,31 @@
 # Tatooine-380
 A collection of scripts and dockers for my home media server
 
+The compose file contains:
+- tecnativa/docker-socket-proxy
+- traefik (v2.2)
+- authelia/authelia
+- dperson/openvpn-client
+- linuxserver/qbittorrent
+- linuxserver/radarr
+- linuxserver/sonarr
+- linuxserver/bazarr
+- linuxserver/lazylibrarian
+- linuxserver/sabnzbd
+- linuxserver/jackett
+- linuxserver/nzbhydra
+- linuxserver/plex
+- linuxserver/tautulli
+- linuxserver/jellyfin
+- linuxserver/emby
+- linuxserver/ombi
+- mariadb (v10.1)
+- phpmyadmin/phpmyadmin
+- afian/filerun
+- linuxserver/lychee
+- netdata/netdata
+- linuxserver/heimdall
+
 TODO:
 - [X] Add Traefik configurations
 - [X] Add Authelia configurations

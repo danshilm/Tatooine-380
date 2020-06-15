@@ -7,6 +7,9 @@ networks:
   t2_proxy:
     external:
       name: t2_proxy
+  t2_internal:
+    external:
+      name: t2_internal
 
 services:
   dockerproxy:
@@ -683,7 +686,7 @@ services:
     security_opt: 
       - no-new-privileges:true
     networks:
-      - t2_web
+      - t2_internal
     volumes:
       - $USERDIR/Services/Filerun/db:/var/lib/mysql
     environment:
@@ -691,6 +694,25 @@ services:
       MYSQL_USER: filerun 
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: filerun_db
+    restart: always
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    hostname: phpmyadmin
+    container_name: phpmyadmin
+    security_opt: 
+      - no-new-privileges
+    depends_on:
+      - db
+    networks:
+      - t2_internal
+    ports:
+      - target: 80
+        published: 480
+        protocol: tcp
+        mode: host
+    environment: 
+      PMA_ARBITRARY: 1
 
   filerun:
     image: afian/filerun
@@ -704,6 +726,7 @@ services:
       - db:db
     networks:
       - t2_web
+      - t2_internal
     ports:
       - target: 80
         published: 280
@@ -718,10 +741,10 @@ services:
       FR_DB_NAME: filerun_db
       FR_DB_USER: filerun
       FR_DB_PASS: password
-      APACHE_RUN_USER: www-data
-      APACHE_RUN_USER_ID: 33
-      APACHE_RUN_GROUP: www-data
-      APACHE_RUN_GROUP_ID: 33
+      APACHE_RUN_USER: user # change this to the user of $USERDIR
+      APACHE_RUN_USER_ID: $PUID
+      APACHE_RUN_GROUP: user # change this to the user of $USERDIR
+      APACHE_RUN_GROUP_ID: $PGID
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -733,6 +756,29 @@ services:
       ## HTTP Services
       - "traefik.http.routers.filerun-rtr.service=filerun-svc"
       - "traefik.http.services.filerun-svc.loadbalancer.server.port=80"
+    restart: unless-stopped
+
+  lychee:
+    image: linuxserver/lychee
+    container_name: lychee
+    hostname: lychee
+    networks:
+      - t2_web
+      - t2_internal
+    links:
+      - db:db
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $USERDIR/Services/Lychee/config:/config
+      - $THEVAULTDIR/Pictures:/media/Pictures
+    ports:
+      - target: 80
+        published: 380
+        protocol: tcp
+        mode: host
     restart: unless-stopped
 
   # netdata:
