@@ -8,3 +8,8 @@ Initial thoughts were to use:
 5. SMART 198 - Offline_Uncorrectable
 
 to judge the probability of drive failure.
+
+For now though, this only gets the SMART status of the drives.
+The files `raw.txt` and `upload.txt` do need to exist beforehand.
+
+NOTE: this script needs to be ran as sudo

@@ -1,5 +1,7 @@
+#!/bin/bash
+
 # cd to appropriate folder
-cd /home/user/Services/cron/folderSizeMonitoring
+cd /home/user/Services/Shared/Grafana/FolderSizeMonitoring
 
 # get folder sizes
 sudo du -s /media/TheVault/PlexMediaServer/* > file_sizes.txt
