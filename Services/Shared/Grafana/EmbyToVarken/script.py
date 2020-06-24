@@ -149,6 +149,7 @@ if (payload != []):
 	try:
 		# print("sending to InfluxDB")
 		r = client.write_points(payload)
+		print("Current streams: ", len(payload))
 		# print(r)
 	except (InfluxDBServerError, ConnectionError) as e:
 		print('Error writing data to influxdb. Dropping this set of data. '
