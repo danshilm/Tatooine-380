@@ -100,7 +100,7 @@ services:
         mode: host
     volumes:
       - $USERDIR/Services/Authelia/lib:/var/lib/authelia
-      - $USERDIR/Services/Authelia/configuration.yml:/etc/authelia/configuration.yml:ro
+      - $USERDIR/Services/Authelia/configuration.yml:/config/configuration.yml:ro
       - $USERDIR/Services/Authelia/users_database.yml:/etc/authelia/users_database.yml
       # - $USERDIR/Services/Authelia/notification.txt:/tmp/authelia/notification.txt
     environment:
