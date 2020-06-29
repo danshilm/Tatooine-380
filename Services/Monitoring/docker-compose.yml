@@ -5,7 +5,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     hostname: grafana
-    user: "1000"
+    user: "1000:1000" # change to your user id($PUID) in the .env file in the Stack folder, as well as your group id($PGID)
     security_opt:
       - no-new-privileges:true=
     depends_on:
@@ -118,6 +118,35 @@ services:
       - t2_web
     volumes:
       - $USERDIR/Services/Monitoring/speedtest/config.ini:/src/config.ini
+    restart: unless-stopped
+
+  dozzle:
+    image: amir20/dozzle
+    container_name: dozzle
+    hostname: dozzle
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+      - proxy
+    ports:
+      - target: 8080
+        published: 8280
+        protocol: tcp
+        mode: host
+    environment:
+      - DOCKER_HOST=tcp://dockerproxy:2375
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.dozzle-rtr.entrypoints=https"
+      - "traefik.http.routers.dozzle-rtr.rule=Host(`dozzle.$DOMAINNAME`)"
+      - "traefik.http.routers.dozzle-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.dozzle-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.dozzle-rtr.service=dozzle-svc"
+      - "traefik.http.services.dozzle-svc.loadbalancer.server.port=8080"
     restart: unless-stopped
 
 networks:
