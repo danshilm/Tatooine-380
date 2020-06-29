@@ -116,7 +116,7 @@ services:
       ## HTTP Services
       - "traefik.http.routers.authelia-rtr.service=authelia-svc"
       - "traefik.http.services.authelia-svc.loadbalancer.server.port=9091"
-    restart: unkess-stopped
+    restart: unless-stopped
 
   vpn:
     image: dperson/openvpn-client
@@ -174,7 +174,7 @@ services:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
-      - UMASK_SET=002
+      - UMASK_SET=022
       - WEBUI_PORT=8100
     labels:
       - "traefik.enable=true"
