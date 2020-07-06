@@ -25,6 +25,7 @@ The compose file contains:
 - linuxserver/lychee
 - netdata/netdata
 - linuxserver/heimdall
+- tzahi12345/youtubedl-material
 
 The compose file in Monitoring contains:
 - grafana/grafana

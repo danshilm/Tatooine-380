@@ -741,9 +741,9 @@ services:
       FR_DB_NAME: filerun_db
       FR_DB_USER: filerun
       FR_DB_PASS: password
-      APACHE_RUN_USER: user # change this to the user of $USERDIR
+      APACHE_RUN_USER: $USER
       APACHE_RUN_USER_ID: $PUID
-      APACHE_RUN_GROUP: user # change this to the user of $USERDIR
+      APACHE_RUN_GROUP: $USER
       APACHE_RUN_GROUP_ID: $PGID
     labels:
       - "traefik.enable=true"
@@ -756,6 +756,42 @@ services:
       ## HTTP Services
       - "traefik.http.routers.filerun-rtr.service=filerun-svc"
       - "traefik.http.services.filerun-svc.loadbalancer.server.port=80"
+    restart: unless-stopped
+
+  youtubedl-material:
+    image: tzahi12345/youtubedl-material
+    container_name: youtubedl-material
+    hostname: youtubedl-material
+    networks:
+      - web
+    ports:
+      - target: 17442
+        published: 8998
+        protocol: tcp
+        mode: host
+    volumes:
+      - $USERDIR/Services/YoutubeDL-Material/appdata:/app/appdata
+      - $USERDIR/Services/YoutubeDL-Material/audio:/app/audio
+      - $USERDIR/Services/YoutubeDL-Material/video:/app/video
+      - $USERDIR/Services/YoutubeDL-Material/subscriptions:/app/subscriptions
+      - $THEVAULTDIR/PlexMediaServer/Downloads/youtubedl:/app/users
+    environment: 
+      - write_ytdl_config=true
+      - ALLOW_CONFIG_MUTATIONS=true
+      # unsure about which one, so I put both
+      - YTDL_UMASK=022
+      - UMASK_SET=022
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.youtubedl-rtr.entrypoints=https"
+      - "traefik.http.routers.youtubedl-rtr.rule=Host(`youtubedl.$DOMAINNAME`)"
+      - "traefik.http.routers.youtubedl-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.youtubedl-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.youtubedl-rtr.service=youtubedl-svc"
+      - "traefik.http.services.youtubedl-svc.loadbalancer.server.port=17442"
     restart: unless-stopped
 
   lychee:
@@ -779,6 +815,17 @@ services:
         published: 380
         protocol: tcp
         mode: host
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.lychee-rtr.entrypoints=https"
+      - "traefik.http.routers.lychee-rtr.rule=Host(`lychee.$DOMAINNAME`)"
+      - "traefik.http.routers.lychee-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.lychee-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.lychee-rtr.service=lychee-svc"
+      - "traefik.http.services.lychee-svc.loadbalancer.server.port=80"
     restart: unless-stopped
 
   # netdata:
