@@ -9,6 +9,7 @@
 # List of users
 users:
 #   USERNAME:
+#     displayname: "DISPLAY_NAME"
 #     password: "HASHED_PASSWORD"
 #     email: USER_EMAIL
 #     groups:
