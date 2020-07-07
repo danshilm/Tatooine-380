@@ -763,7 +763,7 @@ services:
     container_name: youtubedl-material
     hostname: youtubedl-material
     networks:
-      - web
+      - t2_web
     ports:
       - target: 17442
         published: 8998
@@ -795,20 +795,23 @@ services:
     restart: unless-stopped
 
   lychee:
-    image: linuxserver/lychee
+    image: lycheeorg/lychee
     container_name: lychee
     hostname: lychee
     networks:
       - t2_web
-      - t2_internal
-    links:
-      - db:db
+      # - t2_internal # no need if using sqlite
+    # links:
+    #   - db:db
     environment:
       - PUID=$PUID
       - PGID=$PGID
-      - TZ=$TZ
+      - PHP_TZ=$TZ
     volumes:
-      - $USERDIR/Services/Lychee/config:/config
+      - $USERDIR/Services/Lychee/config/conf:/conf
+      - $USERDIR/Services/Lychee/config/uploads:/uploads
+      - $USERDIR/Services/Lychee/config/sym:/sym
+      - $USERDIR/Services/Lychee/config/import:/media/import
       - $THEVAULTDIR/Pictures:/media/Pictures
     ports:
       - target: 80
