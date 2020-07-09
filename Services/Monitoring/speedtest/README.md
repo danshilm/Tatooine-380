@@ -1,1 +1,1 @@
-Does not require anything special. Compose file + the ini file has it all.
+Does not require anything special. The [docker-compose](../docker-compose.yml) file + the [ini](config.ini) file has it all.
