@@ -3,8 +3,11 @@ from sqlite3 import Error
 import csv
 from pathlib import Path
 from datetime import datetime
+import requests
 
 base_path = Path(__file__).parent
+RADARR_API_KEY = "RADARR_API_KEY_HERE"
+RADARR_API_URL = "http://localhost:7878/api/command"
 
 def create_connection(db_file):
     """ create a database connection to the SQLite database
@@ -20,9 +23,12 @@ def create_connection(db_file):
 
     return conn
 
-def getMoviesData():
-    # open csv file
-    # read movie and tmdbId into a list
+def get_movies_data_from_tmm():
+    """
+    open csv file
+    csv file structure: [0 => title, 1 => TmdbId, 2 => path]
+    read movie data into a list
+    """
     file_path = (base_path / "./Exported/movielist.csv").resolve()
     allMoviesData = []
 
@@ -43,6 +49,33 @@ def getMoviesData():
             allMoviesData.append(line)
 
     return allMoviesData
+
+
+def query_for_radarr_ids(conn, movies):
+    """
+    query db for id, path, title, TmdbId
+    returns a list [0 => TmdbId, 1 => Title, 2 => Path, 3 => Id]
+    """
+    sql = '''SELECT "TmdbId", "Title", "Path", "Id" FROM Movies WHERE '''
+
+    for i, movie in enumerate(movies):
+        if i == (len(movies)-1):
+            sql += "\"TmdbId\" = '" + movie[1] + "';"
+        else:
+            sql += "\"TmdbId\" = '" + movie[1] + "' OR "
+
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+    conn.commit()
+    return rows
+
+def trigger_radarr_rescan(radarrMovieId):
+    headers = {'X-Api-Key': RADARR_API_KEY}
+    payload = {'name': 'RefreshMovie', 'movieId': radarrMovieId}
+
+    r = requests.post(RADARR_API_URL, json=payload, headers=headers)
+    return
 
 def update_task(conn, task):
     """
@@ -70,19 +103,21 @@ def main():
     print("Opening database: nzbdrone.db...")
     conn = create_connection(database)
     print("Getting movies data from TMM export csv list...")
-    allMoviesData = getMoviesData()
+    allMoviesDataFromTMM = get_movies_data_from_tmm()
+    allMoviesData = query_for_radarr_ids(conn, allMoviesDataFromTMM)
     numberOfMoviesToUpdate = len(allMoviesData)
     numberOfMoviesUpdated = 0
 
     print("Updating records in database...")
     with conn:
         for movieData in allMoviesData:
-            result = update_task(conn, (movieData[2], movieData[1]))
+            result = update_task(conn, (movieData[2], movieData[0]))
             if (result == 1):
                 numberOfMoviesUpdated += 1
+                trigger_radarr_rescan(movieData[3])
             print("Updating record for " +
-                  movieData[0] + ": " + (("NOPE", "OK")[result == 1]))
-            
+                  movieData[1] + ": " + (("NOPE", "OK")[result == 1]))
+
     conn.close()
     print("Movies updated: " + str(numberOfMoviesUpdated) + "/" + str(numberOfMoviesToUpdate))
     
