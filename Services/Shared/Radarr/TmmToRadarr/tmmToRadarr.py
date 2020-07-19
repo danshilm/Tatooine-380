@@ -4,8 +4,10 @@ import csv
 from pathlib import Path
 from datetime import datetime
 import requests
+import sys
 
 base_path = Path(__file__).parent
+database = (base_path / "./nzbdrone.db").resolve()
 RADARR_API_KEY = "RADARR_API_KEY_HERE"
 RADARR_API_URL = "http://localhost:7878/api/command"
 
@@ -45,11 +47,9 @@ def get_movies_data_from_tmm():
                 continue
             line[2] = line[2].replace(
                 "/media/TheVault/PlexMediaServer/Movies/", "/data/movies/")
-            # print(line)
             allMoviesData.append(line)
 
     return allMoviesData
-
 
 def query_for_radarr_ids(conn, movies):
     """
@@ -75,7 +75,6 @@ def trigger_radarr_rescan(radarrMovieId):
     payload = {'name': 'RefreshMovie', 'movieId': radarrMovieId}
 
     r = requests.post(RADARR_API_URL, json=payload, headers=headers)
-    return
 
 def update_task(conn, task):
     """
@@ -87,39 +86,51 @@ def update_task(conn, task):
               SET Path = ?
               WHERE TmdbId = ?'''
 
-    # print(sql)
     cur = conn.cursor()
     cur.execute(sql, task)
     result = cur.rowcount
     conn.commit()
     return result
 
-def main():
-    database = (base_path / "./nzbdrone.db").resolve()
-
-    print("=================== ", datetime.now(), " ===================")
-
+def updateRadarrEntries():
     # create a database connection
     print("Opening database: nzbdrone.db...")
     conn = create_connection(database)
     print("Getting movies data from TMM export csv list...")
     allMoviesDataFromTMM = get_movies_data_from_tmm()
-    allMoviesData = query_for_radarr_ids(conn, allMoviesDataFromTMM)
-    numberOfMoviesToUpdate = len(allMoviesData)
+    numberOfMoviesToUpdate = len(allMoviesDataFromTMM)
     numberOfMoviesUpdated = 0
 
     print("Updating records in database...")
     with conn:
-        for movieData in allMoviesData:
-            result = update_task(conn, (movieData[2], movieData[0]))
+        for movieData in allMoviesDataFromTMM:
+            result = update_task(conn, (movieData[2], movieData[1]))
             if (result == 1):
                 numberOfMoviesUpdated += 1
-                trigger_radarr_rescan(movieData[3])
             print("Updating record for " +
-                  movieData[1] + ": " + (("NOPE", "OK")[result == 1]))
+                  movieData[0] + ": " + (("NOPE", "OK")[result == 1]))
 
     conn.close()
     print("Movies updated: " + str(numberOfMoviesUpdated) + "/" + str(numberOfMoviesToUpdate))
-    
+
+def rescanUpdatedRadarrMovies():
+    # create a database connection
+    print("Opening database: nzbdrone.db...")
+    conn = create_connection(database)
+    print("Getting movies data from TMM export csv list...")
+    allMoviesDataFromTMM = get_movies_data_from_tmm()
+    print("Getting movies ids from Radarr...")
+    allMoviesData = query_for_radarr_ids(conn, allMoviesDataFromTMM)
+    numberOfMoviesToUpdate = len(allMoviesData)
+    numberOfMoviesUpdated = 0
+
+    print("Triggering Rescan for movies...")
+    with conn:
+        for movieData in allMoviesData:
+            trigger_radarr_rescan(movieData[3])
+
+    conn.close()
+    print("Done")
+
 if __name__ == '__main__':
-    main()
+    globals()[sys.argv[1]]()
