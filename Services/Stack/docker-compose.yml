@@ -218,13 +218,13 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.radarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.radarr-rtr-bypass.rule=Host(`radarr.$DOMAINNAME`) && Headers(`X-Api-Key`, `$RADARR_API_KEY`)"
       - "traefik.http.routers.radarr-rtr-bypass.tls=true"
-      - "traefik.http.routers.radarr-rtr-bypass.rule=Headers(`X-Api-Key`, `$RADARR_API_KEY`)"
       - "traefik.http.routers.radarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.radarr-rtr.entrypoints=https"
-      - "traefik.http.routers.radarr-rtr.tls=true"
       - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.$DOMAINNAME`)"
+      - "traefik.http.routers.radarr-rtr.tls=true"
       - "traefik.http.routers.radarr-rtr.priority=99"
       ## Middlewares
       - "traefik.http.routers.radarr-rtr-bypass.middlewares=chain-no-auth@file"
@@ -263,13 +263,13 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.sonarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.sonarr-rtr-bypass.rule=Host(`sonarr.$DOMAINNAME`) && (Headers(`X-Api-Key`, `$SONARR_API_KEY`) || Query(`apikey=$SONARR_API_KEY`))"
       - "traefik.http.routers.sonarr-rtr-bypass.tls=true"
-      - "traefik.http.routers.sonarr-rtr-bypass.rule=Headers(`X-Api-Key`, `$SONARR_API_KEY`) || Query(`apikey=$SONARR_API_KEY`)"
       - "traefik.http.routers.sonarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.sonarr-rtr.entrypoints=https"
-      - "traefik.http.routers.sonarr-rtr.tls=true"
       - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$DOMAINNAME`)"
+      - "traefik.http.routers.sonarr-rtr.tls=true"
       - "traefik.http.routers.sonarr-rtr.priority=99"
       ## Middlewares
       - "traefik.http.routers.sonarr-rtr-bypass.middlewares=chain-no-auth@file"
@@ -278,6 +278,50 @@ services:
       - "traefik.http.routers.sonarr-rtr.service=sonarr-svc"
       - "traefik.http.routers.sonarr-rtr-bypass.service=sonarr-svc"
       - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
+    restart: unless-stopped
+
+  lidarr:
+    image: linuxserver/lidarr
+    container_name: lidarr
+    hostname: lidarr
+    security_opt: 
+      - no-new-privileges:true
+    networks:
+      - t2_web
+    ports:
+      - target: 8686
+        published: 8686
+        protocol: tcp
+        mode: host
+    volumes:
+      - $USERDIR/Services/Lidarr/:/config
+      - $THEVAULTDIR/PlexMediaServer/Music/:/data/music
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/data/downloads/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/data/recycle_bin
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - UMASK_SET=022 #optional
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.lidarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.lidarr-rtr-bypass.rule=Host(`lidarr.$DOMAINNAME`) && Headers(`X-Api-Key`, `$LIDARR_API_KEY`)"
+      - "traefik.http.routers.lidarr-rtr-bypass.tls=true"
+      - "traefik.http.routers.lidarr-rtr-bypass.priority=100"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.lidarr-rtr.entrypoints=https"
+      - "traefik.http.routers.lidarr-rtr.rule=Host(`lidarr.$DOMAINNAME`)"
+      - "traefik.http.routers.lidarr-rtr.tls=true"
+      - "traefik.http.routers.lidarr-rtr.priority=99"
+      ## Middlewares
+      - "traefik.http.routers.lidarr-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.lidarr-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.lidarr-rtr.service=lidarr-svc"
+      - "traefik.http.routers.lidarr-rtr-bypass.service=lidarr-svc"
+      - "traefik.http.services.lidarr-svc.loadbalancer.server.port=8686"
     restart: unless-stopped
 
   bazarr:
@@ -382,17 +426,17 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.sabnzbd-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.sabnzbd-rtr-bypass.rule=Host(`sabnzbd.$DOMAINNAME`) && Query(`apikey=$SABNZBD_API_KEY`)"
       - "traefik.http.routers.sabnzbd-rtr-bypass.tls=true"
-      - "traefik.http.routers.sabnzbd-rtr-bypass.rule=Query(`apikey=$SABNZBD_API_KEY`)"
       - "traefik.http.routers.sabnzbd-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.sabnzbd-rtr.entrypoints=https"
-      - "traefik.http.routers.sabnzbd-rtr.tls=true"
       - "traefik.http.routers.sabnzbd-rtr.rule=Host(`sabnzbd.$DOMAINNAME`)"
+      - "traefik.http.routers.sabnzbd-rtr.tls=true"
       - "traefik.http.routers.sabnzbd-rtr.priority=99"
       ## Middlewares
       - "traefik.http.routers.sabnzbd-rtr-bypass.middlewares=chain-no-auth@file"
-      - "traefik.http.routers.sabnzbd-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.sabnzbd-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.sabnzbd-rtr.service=sabnzbd-svc"
       # - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
@@ -423,11 +467,18 @@ services:
       - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.jackett-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.jackett-rtr-bypass.rule=Host(`jackett.$DOMAINNAME`) && Query(`apikey=$JACKETT_API_KEY`)"
+      - "traefik.http.routers.jackett-rtr-bypass.tls=true"
+      - "traefik.http.routers.jackett-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.jackett-rtr.entrypoints=https"
       - "traefik.http.routers.jackett-rtr.rule=Host(`jackett.$DOMAINNAME`)"
       - "traefik.http.routers.jackett-rtr.tls=true"
+      - "traefik.http.routers.jackett-rtr.priority=99"
       ## Middlewares
+      - "traefik.http.routers.jackett-rtr-bypass.middlewares=chain-no-auth@file"
       - "traefik.http.routers.jackett-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.jackett-rtr.service=jackett-svc"
@@ -459,11 +510,18 @@ services:
       - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.hydra-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.hydra-rtr-bypass.rule=Host(`nzbhydra.$DOMAINNAME`) && Query(`apikey=$HYDRA_API_KEY`)"
+      - "traefik.http.routers.hydra-rtr-bypass.tls=true"
+      - "traefik.http.routers.hydra-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.hydra-rtr.entrypoints=https"
       - "traefik.http.routers.hydra-rtr.rule=Host(`nzbhydra.$DOMAINNAME`)"
       - "traefik.http.routers.hydra-rtr.tls=true"
+      - "traefik.http.routers.hydra-rtr-bypass.priority=99"
       ## Middlewares
+      - "traefik.http.routers.hydra-rtr-bypass.middlewares=chain-no-auth@file"
       - "traefik.http.routers.hydra-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.hydra-rtr.service=hydra-svc"

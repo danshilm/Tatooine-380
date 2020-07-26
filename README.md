@@ -9,6 +9,7 @@ The compose file contains:
 - linuxserver/qbittorrent
 - linuxserver/radarr
 - linuxserver/sonarr
+- linuxserver/lidarr
 - linuxserver/bazarr
 - linuxserver/lazylibrarian
 - linuxserver/sabnzbd
