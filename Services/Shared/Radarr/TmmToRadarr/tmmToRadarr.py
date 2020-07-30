@@ -7,7 +7,7 @@ import requests
 import sys
 
 base_path = Path(__file__).parent
-database = (base_path / "./nzbdrone.db").resolve()
+database = (base_path / "./radarr.db").resolve()
 RADARR_API_KEY = "RADARR_API_KEY_HERE"
 RADARR_API_URL = "http://localhost:7878/api/command"
 
@@ -46,7 +46,7 @@ def get_movies_data_from_tmm():
             if "/media/TheVault/PlexMediaServer/Movies-4K/" in line[2]:
                 continue
             line[2] = line[2].replace(
-                "/media/TheVault/PlexMediaServer/Movies/", "/data/movies/")
+                "/media/TheVault/PlexMediaServer/Movies/", "/data/Movies/")
             allMoviesData.append(line)
 
     return allMoviesData
@@ -115,7 +115,7 @@ def updateRadarrEntries():
 
 def rescanUpdatedRadarrMovies():
     # create a database connection
-    print("Opening database: nzbdrone.db...")
+    print("Opening database: radarr.db...")
     conn = create_connection(database)
     print("Getting movies data from TMM export csv list...")
     allMoviesDataFromTMM = get_movies_data_from_tmm()

@@ -191,7 +191,7 @@ services:
     restart: unless-stopped
 
   radarr:
-    image: linuxserver/radarr
+    image: linuxserver/radarr:preview
     container_name: radarr
     hostname: radarr
     security_opt: 
@@ -233,7 +233,7 @@ services:
     restart: unless-stopped
 
   sonarr:
-    image: linuxserver/sonarr
+    image: linuxserver/sonarr:preview
     container_name: sonarr
     hostname: sonarr
     security_opt: 
