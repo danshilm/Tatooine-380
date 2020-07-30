@@ -169,7 +169,7 @@ services:
       - $USERDIR/Services/qBitTorrent/:/config
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
       - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
-      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
+      - $THEVAULTDIR/PlexMediaServer/Downloads/blackhole_torrent:/blackhole_torrent
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -205,10 +205,7 @@ services:
         mode: host
     volumes:
       - $USERDIR/Services/Radarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/Movies/:/data/movies
-      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/data/movies-4K
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/data/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/data/recycle_bin
+      - $THEVAULTDIR/PlexMediaServer/data/:/data/
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -250,10 +247,7 @@ services:
         mode: host
     volumes:
       - $USERDIR/Services/Sonarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
-      - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/data/downloads/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/data/recycle_bin
+      - $THEVAULTDIR/PlexMediaServer/data/:/data/
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -295,9 +289,7 @@ services:
         mode: host
     volumes:
       - $USERDIR/Services/Lidarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/Music/:/data/music
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/data/downloads/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/data/recycle_bin
+      - $THEVAULTDIR/PlexMediaServer/:/data/
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -339,10 +331,7 @@ services:
         mode: host
     volumes:
       - $USERDIR/Services/Bazarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/Movies/:/data/movies
-      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/data/movies-4K
-      - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
-      - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
+      - $THEVAULTDIR/PlexMediaServer/:/data/
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -501,8 +490,8 @@ services:
     volumes:
       - $USERDIR/Services/NzbHydra:/config
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
-      - $USERDIR/Downloads/nzb_blackhole/:/nzb_blackhole
+      - $THEVAULTDIR/Downloads/blackhole_torrent:/blackhole_torrent
+      - $THEVAULTDIR/Downloads/blackhole_nzb:/blackhole_nzb
     environment:
       - PUID=$PUID
       - PGID=$PGID
