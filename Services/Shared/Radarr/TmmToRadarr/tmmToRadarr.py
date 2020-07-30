@@ -94,7 +94,7 @@ def update_task(conn, task):
 
 def updateRadarrEntries():
     # create a database connection
-    print("Opening database: nzbdrone.db...")
+    print("Opening database: radarr.db...")
     conn = create_connection(database)
     print("Getting movies data from TMM export csv list...")
     allMoviesDataFromTMM = get_movies_data_from_tmm()
