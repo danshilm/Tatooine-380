@@ -38,7 +38,7 @@ services:
       - t2_proxy
       - t2_web
     ports:
-      # https://www.reddit.com/r/docker/comments/c1wrep/traefik_reverse_proxy_question_docker_overlay/
+      # https://www.reddit.com/r/docker/comments/c1wrep/traefik_reverse_proxy_question_docker_overlay
       - target: 80
         published: 80
         protocol: tcp
@@ -166,7 +166,7 @@ services:
       - vpn
     network_mode: "service:vpn"
     volumes:
-      - $USERDIR/Services/qBitTorrent/:/config
+      - $USERDIR/Services/qBitTorrent:/config
       - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
       - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
       - $THEVAULTDIR/PlexMediaServer/Downloads/blackhole_torrent:/blackhole_torrent
@@ -204,8 +204,8 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Radarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/data/:/data/
+      - $USERDIR/Services/Radarr:/config
+      - $THEVAULTDIR/PlexMediaServer/data:/data
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -246,8 +246,8 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Sonarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/data/:/data/
+      - $USERDIR/Services/Sonarr:/config
+      - $THEVAULTDIR/PlexMediaServer/data:/data
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -288,8 +288,8 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Lidarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/:/data/
+      - $USERDIR/Services/Lidarr:/config
+      - $THEVAULTDIR/PlexMediaServer:/data
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -330,8 +330,8 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Bazarr/:/config
-      - $THEVAULTDIR/PlexMediaServer/:/data/
+      - $USERDIR/Services/Bazarr:/config
+      - $THEVAULTDIR/PlexMediaServer:/data
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -364,10 +364,10 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/LazyLibrarian/:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads/:/data/downloads/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Readables/Books/:/data/books
-      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks/:/data/audiobooks
+      - $USERDIR/Services/LazyLibrarian:/config
+      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
+      - $THEVAULTDIR/PlexMediaServer/Readables/Books:/data/books
+      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks:/data/audiobooks
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -561,12 +561,12 @@ services:
     #     mode: host
     volumes:
       - $USERDIR/Services/Plex/config:/config
-      - $THEVAULTDIR/PlexMediaServer/TvShows/:/media/tvshows
-      - $THEVAULTDIR/PlexMediaServer/Movies/:/media/movies
-      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/movies-4K
-      - $THEVAULTDIR/PlexMediaServer/Music/:/media/music
-      - $THEVAULTDIR/PlexMediaServer/Anime/:/media/anime
-      - $THEVAULTDIR/PlexMediaServer/DVR/:/media/dvr
+      - $THEVAULTDIR/PlexMediaServer/TvShows:/media/tvshows
+      - $THEVAULTDIR/PlexMediaServer/Movies:/media/movies
+      - $THEVAULTDIR/PlexMediaServer/Movies-4K:/movies-4K
+      - $THEVAULTDIR/PlexMediaServer/Music:/media/music
+      - $THEVAULTDIR/PlexMediaServer/Anime:/media/anime
+      - $THEVAULTDIR/PlexMediaServer/DVR:/media/dvr
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -600,8 +600,8 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Tautulli/:/config
-      - $USERDIR/Services/Plex/config/Library/Application Support/Plex Media Server/Logs/:/Plex_logs
+      - $USERDIR/Services/Tautulli:/config
+      - $USERDIR/Services/Plex/config/Library/Application Support/Plex Media Server/Logs:/Plex_logs
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -629,12 +629,12 @@ services:
   #   ports:
   #     - 8096:8096
   #   volumes:
-  #     - $USERDIR/Services/Jellyfin/:/config
-  #     - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
-  #     - $THEVAULTDIR/PlexMediaServer/Movies/:/data/movies
-  #     - $THEVAULTDIR/PlexMediaServer/Music/:/data/music
-  #     - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
-  #     - $THEVAULTDIR/PlexMediaServer/DVR/:/data/dvr
+  #     - $USERDIR/Services/Jellyfin:/config
+  #     - $THEVAULTDIR/PlexMediaServer/TvShows:/data/tvshows
+  #     - $THEVAULTDIR/PlexMediaServer/Movies:/data/movies
+  #     - $THEVAULTDIR/PlexMediaServer/Music:/data/music
+  #     - $THEVAULTDIR/PlexMediaServer/Anime:/data/anime
+  #     - $THEVAULTDIR/PlexMediaServer/DVR:/data/dvr
   #   #   - /opt/vc/lib:/opt/vc/lib #optional
   #   devices:
   #     - /dev/dri:/dev/dri #optional
@@ -672,13 +672,13 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Emby/:/config
-      - $THEVAULTDIR/PlexMediaServer/TvShows/:/data/tvshows
-      - $THEVAULTDIR/PlexMediaServer/Movies/:/data/movies
-      - $THEVAULTDIR/PlexMediaServer/Movies-4K/:/data/movies-4K
-      - $THEVAULTDIR/PlexMediaServer/Music/:/data/music
-      - $THEVAULTDIR/PlexMediaServer/Anime/:/data/anime
-      - $THEVAULTDIR/PlexMediaServer/DVR/:/data/dvr
+      - $USERDIR/Services/Emby:/config
+      - $THEVAULTDIR/PlexMediaServer/TvShows:/data/tvshows
+      - $THEVAULTDIR/PlexMediaServer/Movies:/data/movies
+      - $THEVAULTDIR/PlexMediaServer/Movies-4K:/data/movies-4K
+      - $THEVAULTDIR/PlexMediaServer/Music:/data/music
+      - $THEVAULTDIR/PlexMediaServer/Anime:/data/anime
+      - $THEVAULTDIR/PlexMediaServer/DVR:/data/dvr
       - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
       # - /path/for/transcoding:/transcode #optional
       # - /opt/vc/lib:/opt/vc/lib #optional
@@ -702,6 +702,45 @@ services:
       - "traefik.http.services.emby-svc.loadbalancer.server.port=8096"
     restart: unless-stopped
 
+  airsonic:
+    image: linuxserver/airsonic
+    container_name: airsonic
+    hostname: airsonic
+    security_opt: 
+      - no-new-privileges:true
+    networks:
+      - t2_web
+    ports:
+      - target: 4040
+        published: 4040
+        protocol: tcp
+        mode: host
+    volumes:
+      - $USERDIR/Services/Airsonic/config:/config # remember to create this folder beforehand
+      - $USERDIR/Services/Airsonic/playlists:/data/playlists # remember to create this folder beforehand
+      - $USERDIR/Services/Airsonic/unsorted:/data/unsorted # remember to create this folder beforehand
+      - $THEVAULTDIR/PlexMediaServer/Music:/data/music
+      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks:/data/audiobooks
+      - $THEVAULTDIR/PlexMediaServer/Readables/Podcasts:/data/podcasts
+    # devices:
+    #   - /dev/snd:/dev/snd #optional for jukebox player
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.airsonic-rtr.entrypoints=https"
+      - "traefik.http.routers.airsonic-rtr.rule=Host(`airsonic.$DOMAINNAME`)"
+      - "traefik.http.routers.airsonic-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.airsonic-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.airsonic-rtr.service=airsonic-svc"
+      - "traefik.http.services.airsonic-svc.loadbalancer.server.port=4040"
+    restart: unless-stopped
+
   ombi:
     image: linuxserver/ombi
     container_name: ombi
@@ -716,7 +755,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Ombi/:/config
+      - $USERDIR/Services/Ombi:/config
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -790,7 +829,7 @@ services:
         mode: host
     volumes:
       - $USERDIR/Services/Filerun/html:/var/www/html
-      - $USERDIR/:/user-files
+      - $USERDIR:/user-files
     environment:
       FR_DB_HOST: db
       FR_DB_PORT: 3306
@@ -945,7 +984,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Heimdall/:/config
+      - $USERDIR/Services/Heimdall:/config
     environment:
       - PUID=$PUID
       - PGID=$PGID

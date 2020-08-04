@@ -19,6 +19,7 @@ The compose file contains:
 - linuxserver/tautulli
 - linuxserver/jellyfin
 - linuxserver/emby
+- linuxserver/airsonic
 - linuxserver/ombi
 - mariadb (v10.1)
 - phpmyadmin/phpmyadmin
