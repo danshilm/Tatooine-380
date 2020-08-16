@@ -339,11 +339,18 @@ services:
       - UMASK_SET=022 #optional
     labels:
       - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.bazarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.bazarr-rtr-bypass.rule=Host(`bazarr.$DOMAINNAME`) && Query(`apikey=$BAZARR_API_KEY`)"
+      - "traefik.http.routers.bazarr-rtr-bypass.tls=true"
+      - "traefik.http.routers.bazarr-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.bazarr-rtr.entrypoints=https"
       - "traefik.http.routers.bazarr-rtr.rule=Host(`bazarr.$DOMAINNAME`)"
       - "traefik.http.routers.bazarr-rtr.tls=true"
+      - "traefik.http.routers.bazarr-rtr.priority=99"
       ## Middlewares
+      - "traefik.http.routers.bazarr-rtr-bypass.middlewares=chain-no-auth@file"
       - "traefik.http.routers.bazarr-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.bazarr-rtr.service=bazarr-svc"
