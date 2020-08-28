@@ -717,7 +717,7 @@ services:
       - no-new-privileges:true
     user: "$PUID:$PGID"
     networks:
-      - web
+      - t2_web
     ports:
       - target: 4533
         published: 4533

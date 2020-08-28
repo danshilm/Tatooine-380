@@ -1,6 +1,7 @@
 # Tatooine-380
-A collection of scripts and dockers for my home media server
-The *rrs work with Nzb360.
+A collection of scripts and dockers for my home media server.
+
+NOTE: The *rrs work with Nzb360.
 
 The compose file contains:
 - tecnativa/docker-socket-proxy

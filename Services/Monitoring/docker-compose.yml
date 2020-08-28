@@ -5,7 +5,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     hostname: grafana
-    user: "1000:1000" # change to your user id($PUID) in the .env file in the Stack folder, as well as your group id($PGID)
+    user: "$PUID:PGID"
     security_opt:
       - no-new-privileges:true=
     depends_on:
@@ -32,7 +32,7 @@ services:
       - "traefik.http.routers.grafana-rtr.rule=Host(`grafana.$DOMAINNAME`)"
       - "traefik.http.routers.grafana-rtr.tls=true"
       ## Middlewares
-      - "traefik.http.routers.grafana-rtr.middlewares=chain-authelia@file"
+      - "traefik.http.routers.grafana-rtr.middlewares=chain-no-auth@file"
       ## HTTP Services
       - "traefik.http.routers.grafana-rtr.service=grafana-svc"
       - "traefik.http.services.grafana-svc.loadbalancer.server.port=3000"
@@ -93,7 +93,7 @@ services:
     hostname: varken
     container_name: varken
     image: boerderij/varken
-    # user: "1000"
+    # user: "PUID:PGID"
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -127,8 +127,8 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      - web
-      - proxy
+      - t2_web
+      - t2_proxy
     ports:
       - target: 8080
         published: 8280
@@ -151,4 +151,6 @@ services:
 
 networks:
   t2_web:
+    external: true
+  t2_proxy:
     external: true
