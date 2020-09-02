@@ -357,41 +357,38 @@ services:
       - "traefik.http.services.bazarr-svc.loadbalancer.server.port=6767"
     restart: unless-stopped
 
-  lazylibrarian:
-    image: linuxserver/lazylibrarian
-    container_name: lazylibrarian
-    hostname: lazylibrarian
+  readarr:
+    image: hotio/readarr:unstable
+    container_name: readarr
+    hostname: readarr
     security_opt: 
       - no-new-privileges:true
     networks:
       - t2_web
     ports:
-      - target: 5299
-        published: 5299
+      - target: 8787
+        published: 8787
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/LazyLibrarian:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Readables/Books:/data/books
-      - $THEVAULTDIR/PlexMediaServer/Readables/Audiobooks:/data/audiobooks
+      - $USERDIR/Services/Readarr:/config
+      - $THEVAULTDIR/PlexMediaServer:/data
     environment:
       - PUID=$PUID
       - PGID=$PGID
       - TZ=$TZ
       - UMASK_SET=022 #optional
-      # - DOCKER_MODS=linuxserver/calibre-web:calibre #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
-      - "traefik.http.routers.lazylibrarian-rtr.entrypoints=https"
-      - "traefik.http.routers.lazylibrarian-rtr.rule=Host(`lazylib.$DOMAINNAME`)"
-      - "traefik.http.routers.lazylibrarian-rtr.tls=true"
+      - "traefik.http.routers.readarr-rtr.entrypoints=https"
+      - "traefik.http.routers.readarr-rtr.rule=Host(`readarr.$DOMAINNAME`)"
+      - "traefik.http.routers.readarr-rtr.tls=true"
       ## Middlewares
-      - "traefik.http.routers.lazylibrarian-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.readarr-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
-      - "traefik.http.routers.lazylibrarian-rtr.service=lazylibrarian-svc"
-      - "traefik.http.services.lazylibrarian-svc.loadbalancer.server.port=5299"
+      - "traefik.http.routers.readarr-rtr.service=readarr-svc"
+      - "traefik.http.services.readarr-svc.loadbalancer.server.port=8787"
     restart: unless-stopped
   
   sabnzbd:
@@ -928,50 +925,6 @@ services:
       - "traefik.http.routers.lychee-rtr.service=lychee-svc"
       - "traefik.http.services.lychee-svc.loadbalancer.server.port=80"
     restart: unless-stopped
-
-  # netdata:
-  #   image: netdata/netdata
-  #   hostname: netdata.$DOMAINNAME
-  #   container_name: netdata
-  #   security_opt:
-  #     - apparmor:unconfined
-  #   cap_add:
-  #     - SYS_PTRACE
-  #     - SYS_ADMIN
-  #   depends_on:
-  #     - dockerproxy
-  #   networks:
-  #     - t2_proxy
-  #     - t2_web
-  #   ports:
-  #     - 19999:19999
-  #     - 4242:4242 #for opentsdb backend
-  #   volumes:
-  #     - /etc/passwd:/host/etc/passwd:ro
-  #     - /etc/group:/host/etc/group:ro
-  #     - /proc:/host/proc:ro
-  #     - /sys:/host/sys:ro
-  #     - /etc/os-release:/host/etc/os-release:ro
-  #     - /var/log/smartd:/var/log/smartd
-  #     - $USERDIR/Services/Monitoring/netdata/config/netdata.conf:/etc/netdata/netdata.conf
-  #     - $USERDIR/Services/Monitoring/netdata/config/traefik.conf:/etc/netdata/python.d/traefik.conf
-  #     - $USERDIR/Services/Monitoring/netdata/config/smartd_log.conf:/etc/netdata/python.d/smartd_log.conf
-  #   environment:
-  #     - DOCKER_HOST=dockerproxy:2375
-  #     - TZ=$TZ
-  #     - PGID=$PGID
-  #   labels:
-  #     - "traefik.enable=true"
-  #     ## HTTP Routers
-  #     - "traefik.http.routers.netdata-rtr.entrypoints=https"
-  #     - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
-  #     - "traefik.http.routers.netdata-rtr.tls=true"
-  #     ## Middlewares
-  #     - "traefik.http.routers.netdata-rtr.middlewares=chain-authelia@file"
-  #     ## HTTP Services
-  #     - "traefik.http.routers.netdata-rtr.service=netdata-svc"
-  #     - "traefik.http.services.netdata-svc.loadbalancer.server.port=19999"
-  #   restart: unless-stopped
 
   heimdall:
     image: linuxserver/heimdall

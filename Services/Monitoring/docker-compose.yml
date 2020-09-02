@@ -1,6 +1,50 @@
 version: "3.7"
 
 services:
+  # netdata:
+  #   image: netdata/netdata
+  #   hostname: netdata.$DOMAINNAME
+  #   container_name: netdata
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   cap_add:
+  #     - SYS_PTRACE
+  #     - SYS_ADMIN
+  #   depends_on:
+  #     - dockerproxy
+  #   networks:
+  #     - t2_proxy
+  #     - t2_web
+  #   ports:
+  #     - 19999:19999
+  #     - 4242:4242 #for opentsdb backend
+  #   volumes:
+  #     - /etc/passwd:/host/etc/passwd:ro
+  #     - /etc/group:/host/etc/group:ro
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /etc/os-release:/host/etc/os-release:ro
+  #     - /var/log/smartd:/var/log/smartd
+  #     - $USERDIR/Services/Monitoring/netdata/config/netdata.conf:/etc/netdata/netdata.conf
+  #     - $USERDIR/Services/Monitoring/netdata/config/traefik.conf:/etc/netdata/python.d/traefik.conf
+  #     - $USERDIR/Services/Monitoring/netdata/config/smartd_log.conf:/etc/netdata/python.d/smartd_log.conf
+  #   environment:
+  #     - DOCKER_HOST=dockerproxy:2375
+  #     - TZ=$TZ
+  #     - PGID=$PGID
+  #   labels:
+  #     - "traefik.enable=true"
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.netdata-rtr.entrypoints=https"
+  #     - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
+  #     - "traefik.http.routers.netdata-rtr.tls=true"
+  #     ## Middlewares
+  #     - "traefik.http.routers.netdata-rtr.middlewares=chain-authelia@file"
+  #     ## HTTP Services
+  #     - "traefik.http.routers.netdata-rtr.service=netdata-svc"
+  #     - "traefik.http.services.netdata-svc.loadbalancer.server.port=19999"
+  #   restart: unless-stopped
+
   grafana:
     image: grafana/grafana
     container_name: grafana

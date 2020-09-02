@@ -13,7 +13,7 @@ The compose file contains:
 - linuxserver/sonarr
 - linuxserver/lidarr
 - linuxserver/bazarr
-- linuxserver/lazylibrarian
+- hotio/readarr
 - linuxserver/sabnzbd
 - linuxserver/jackett
 - linuxserver/nzbhydra
@@ -26,12 +26,12 @@ The compose file contains:
 - mariadb (v10.1)
 - phpmyadmin/phpmyadmin
 - afian/filerun
-- linuxserver/lychee
-- netdata/netdata
+- lycheeorg/lychee
 - linuxserver/heimdall
 - tzahi12345/youtubedl-material
 
 The compose file in Monitoring contains:
+- netdata/netdata
 - grafana/grafana
 - prom/prometheus
 - influxdb
