@@ -191,7 +191,7 @@ services:
     restart: unless-stopped
 
   radarr:
-    image: linuxserver/radarr:preview
+    image: linuxserver/radarr:nightly
     container_name: radarr
     hostname: radarr
     security_opt: 
