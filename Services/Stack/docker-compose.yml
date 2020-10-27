@@ -276,7 +276,7 @@ services:
     restart: unless-stopped
 
   lidarr:
-    image: linuxserver/lidarr
+    image: linuxserver/lidarr:nightly
     container_name: lidarr
     hostname: lidarr
     security_opt: 
