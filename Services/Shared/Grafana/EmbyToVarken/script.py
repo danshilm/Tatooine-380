@@ -26,74 +26,84 @@ for session in sessions:
 	session_dict = {}
 	if ("NowPlayingItem" in session):
 
-		if ("SeriesName" in session['NowPlayingItem']):
-			media_title = session['NowPlayingItem']['SeriesName'] + " - S" + str("{0:0=2d}".format(session['NowPlayingItem']['ParentIndexNumber'])) + "E" + str("{0:0=2d}".format(session['NowPlayingItem']['IndexNumber'])) + ": " + session['NowPlayingItem']['Name']
-			session_dict['title'] = media_title
+		if (session['NowPlayingItem']['Type'] == 'Episode'):
+			session_dict['title'] = session['NowPlayingItem']['SeriesName'] + " - S" + str("{0:0=2d}".format(session['NowPlayingItem']['ParentIndexNumber'])) + "E" + str("{0:0=2d}".format(session['NowPlayingItem']['IndexNumber'])) + ": " + session['NowPlayingItem']['Name']
 			session_dict['media_type'] = "Episode"
-		else:
+		elif (session['NowPlayingItem']['Type'] == 'Movie'):
 			session_dict['title'] = session['NowPlayingItem']['Name']
 			session_dict['media_type'] = "Movie"
+		elif (session['NowPlayingItem']['Type'] == 'Audio'):
+			session_dict['title'] = session['NowPlayingItem']['Name'] + " - " + session['NowPlayingItem']['Artists'][0]
+			session_dict['media_type'] = "Track"
 
-		if (session['PlayState']['PlayMethod'] == "DirectStream"):
-			session_dict['video_decision'] = "Direct Stream"
-		elif (session['PlayState']['PlayMethod'] == "DirectPlay"):
-			session_dict['video_decision'] = "Direct Play"
-		else:
-			session_dict['video_decision'] = "Transcode"
-		
-		if (session['PlayState']['PlayMethod'] == "DirectStream" or session['PlayState']['PlayMethod'] == "DirectPlay"):
-			session_dict['quality_profile'] = "Original"
-			
-			if (session['NowPlayingItem']['Width'] <= 640):
-				session_dict['quality'] = "SD"
-			elif (session['NowPlayingItem']['Width'] <= 854):
-				session_dict['quality'] = "480p"
-			elif (session['NowPlayingItem']['Width'] <= 1280):
-				session_dict['quality'] = "720p"
-			elif (session['NowPlayingItem']['Width'] <= 1920):
-				session_dict['quality'] = "1080p"
-			elif (session['NowPlayingItem']['Width'] <= 2560):
-				session_dict['quality'] = "1440p"
-			elif (session['NowPlayingItem']['Width'] <= 3840):
-				session_dict['quality'] = "4K"
-
-			session_dict['transcode_hw_decoding'] = 0
-			session_dict['transcode_hw_encoding'] = 0
-
-			session_dict['audio_codec'] = session['NowPlayingItem']['MediaStreams'][session['PlayState']['AudioStreamIndex']]['Codec']
-
-		else:
-
-			if (session['TranscodingInfo']['Width'] <= 640):
-				session_dict['quality'] = "SD"
-				session_dict['quality_profile'] = "SD"
-			elif (session['TranscodingInfo']['Width'] <= 854):
-				session_dict['quality'] = "480p"
-				session_dict['quality_profile'] = "480p"
-			elif (session['TranscodingInfo']['Width'] <= 1280):
-				session_dict['quality'] = "720p"
-				session_dict['quality_profile'] = "720p"
-			elif (session['TranscodingInfo']['Width'] <= 1920):
-				session_dict['quality'] = "1080p"
-				session_dict['quality_profile'] = "1080p"
-			elif (session['TranscodingInfo']['Width'] <= 2560):
-				session_dict['quality'] = "1440p"
-				session_dict['quality_profile'] = "1440p"
-			elif (session['TranscodingInfo']['Width'] <= 3840):
-				session_dict['quality'] = "4K"
-				session_dict['quality_profile'] = "4K"
-
-			if (session['TranscodingInfo']['VideoDecoderIsHardware'] == True):
-				session_dict['transcode_hw_decoding'] = 1
+		if (session['NowPlayingItem']['Type'] != 'Audio'):
+			if (session['PlayState']['PlayMethod'] == "DirectStream"):
+				session_dict['video_decision'] = "Direct Stream"
+			elif (session['PlayState']['PlayMethod'] == "DirectPlay"):
+				session_dict['video_decision'] = "Direct Play"
 			else:
+				session_dict['video_decision'] = "Transcode"
+
+			if (session['PlayState']['PlayMethod'] == "DirectStream" or session['PlayState']['PlayMethod'] == "DirectPlay" or (session['PlayState']['PlayMethod'] == "Transcode" and "TranscodingInfo" not in session)):
+				session_dict['quality_profile'] = "Original"
+				
+				if (session['NowPlayingItem']['Width'] <= 640):
+					session_dict['quality'] = "SD"
+				elif (session['NowPlayingItem']['Width'] <= 854):
+					session_dict['quality'] = "480p"
+				elif (session['NowPlayingItem']['Width'] <= 1280):
+					session_dict['quality'] = "720p"
+				elif (session['NowPlayingItem']['Width'] <= 1920):
+					session_dict['quality'] = "1080p"
+				elif (session['NowPlayingItem']['Width'] <= 2560):
+					session_dict['quality'] = "1440p"
+				elif (session['NowPlayingItem']['Width'] <= 3840):
+					session_dict['quality'] = "4K"
+				
 				session_dict['transcode_hw_decoding'] = 0
-
-			if (session['TranscodingInfo']['VideoEncoderIsHardware'] == True):
-				session_dict['transcode_hw_encoding'] = 1
-			else:
 				session_dict['transcode_hw_encoding'] = 0
 
-			session_dict['audio_codec'] = session['TranscodingInfo']['AudioCodec']
+				session_dict['audio_codec'] = session['NowPlayingItem']['MediaStreams'][session['PlayState']['AudioStreamIndex']]['Codec']
+
+			elif (session['PlayState']['PlayMethod'] == "Transcode"):
+				if (session['TranscodingInfo']['Width'] <= 640):
+					session_dict['quality'] = "SD"
+					session_dict['quality_profile'] = "SD"
+				elif (session['TranscodingInfo']['Width'] <= 854):
+					session_dict['quality'] = "480p"
+					session_dict['quality_profile'] = "480p"
+				elif (session['TranscodingInfo']['Width'] <= 1280):
+					session_dict['quality'] = "720p"
+					session_dict['quality_profile'] = "720p"
+				elif (session['TranscodingInfo']['Width'] <= 1920):
+					session_dict['quality'] = "1080p"
+					session_dict['quality_profile'] = "1080p"
+				elif (session['TranscodingInfo']['Width'] <= 2560):
+					session_dict['quality'] = "1440p"
+					session_dict['quality_profile'] = "1440p"
+				elif (session['TranscodingInfo']['Width'] <= 3840):
+					session_dict['quality'] = "4K"
+					session_dict['quality_profile'] = "4K"
+
+				if (session['TranscodingInfo']['VideoDecoderIsHardware'] == True):
+					session_dict['transcode_hw_decoding'] = 1
+				else:
+					session_dict['transcode_hw_decoding'] = 0
+
+				if (session['TranscodingInfo']['VideoEncoderIsHardware'] == True):
+					session_dict['transcode_hw_encoding'] = 1
+				else:
+					session_dict['transcode_hw_encoding'] = 0
+
+				session_dict['audio_codec'] = session['TranscodingInfo']['AudioCodec']
+
+		else:
+			session_dict['video_decision'] = "Music"
+			session_dict['quality'] = session['NowPlayingItem']['Container'].upper()
+			session_dict['quality_profile'] = "Original"
+			session_dict['transcode_hw_decoding'] = 0
+			session_dict['transcode_hw_encoding'] = 0
+			session_dict['audio_codec'] = session['NowPlayingItem']['Container']
 
 		if (session['PlayState']['IsPaused'] == True):
 			session_dict['player_state'] = 1
