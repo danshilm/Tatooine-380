@@ -34,12 +34,14 @@
 
 [log]
   level = "DEBUG"
+  filePath = "/logs/log.log"
 
 [accessLog]
-  filePath = "/traefik.log"
+  filePath = "/logs/accessLog.log"
   bufferingSize = 100
   [accessLog.filters]
-    statusCodes = "400-499"
+    statusCodes = ["200", "300-302", "400-499"]
+    retryAttempts = true
 
 [certificatesResolvers]
   [certificatesResolvers.default]
@@ -48,5 +50,17 @@
       storage = "acme.json"
       [certificatesResolvers.default.acme.dnsChallenge]
         provider = "cloudflare"
-        # had to set to around 30s the first time
+        # had to set delayBeforeCheck to around 30s the first time
         delayBeforeCheck = "0s"
+
+[metrics]
+	[metrics.influxDB]
+		address = "influxdb:8086"
+    protocol = "http"
+    database = "traefik" # create the database beforehand
+    retentionPolicy = ""
+    username = "username"
+    password = "password"
+    addEntryPointsLabels = true
+    addServicesLabels = true
+    pushInterval = "10s"
