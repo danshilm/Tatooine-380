@@ -54,8 +54,8 @@
         delayBeforeCheck = "0s"
 
 [metrics]
-	[metrics.influxDB]
-		address = "influxdb:8086"
+  [metrics.influxDB]
+    address = "influxdb:8086"
     protocol = "http"
     database = "traefik" # create the database beforehand
     retentionPolicy = ""
