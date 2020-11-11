@@ -359,7 +359,7 @@ services:
     restart: unless-stopped
 
   readarr:
-    image: hotio/readarr:unstable
+    image: hotio/readarr:nightly
     container_name: readarr
     hostname: readarr
     security_opt: 
