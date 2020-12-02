@@ -3,7 +3,7 @@ It's to have `current streams` on Grafana as what Varken does for Plex, but for 
 
 
 ## FolderSizeMonitoring 
-It's to have the Disks -> Storage Space pie chart shown [here](https://github.com/danshilm/Tatooine-380/tree/master/Services/Monitoring/grafana).
+It's to have the Disks -> Storage Space pie chart shown [here](../../Monitoring/grafana/README.md).
 
 
 ## SmartHddMonitoring

@@ -24,3 +24,5 @@ That script is meant to run as a post-processing script in Radarr so that Radarr
 I've set it so the script is ran when a download has completed and when manually importing movies too, that way I don't have to manually move the "Featurettes" folder over.
 
 To add the script to Radarr, head to `Settings`, `Connect` and add a `Custom Script`. Name it however you like (mine is named "Import Movie Featurettes") and set the path of the script to `/shared/ImportMovieFeaturettes/script.sh`. The path to the script depends on how you mounted the folder to the container, but if you're using the docker-compose file as it is on this repository, the latter path is the correct one. As for the trigger, only choose `Be notified when movies are successfully imported`.
+
+This script can also be setup as a post-processing script in Sonarr.
