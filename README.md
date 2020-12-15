@@ -3,7 +3,7 @@ A collection of scripts and dockers for my home media server.
 
 NOTE: The *rrs work with Nzb360.
 
-The compose file contains:
+The compose file in [Stack](Services/Stack) contains:
 - tecnativa/docker-socket-proxy
 - traefik (v2.2)
 - authelia/authelia
@@ -22,7 +22,7 @@ The compose file contains:
 - linuxserver/jellyfin
 - linuxserver/emby
 - deluan/navidrome
-- linuxserver/ombi
+- sctx/overseerr
 - mariadb (v10.1)
 - phpmyadmin/phpmyadmin
 - afian/filerun
@@ -30,7 +30,7 @@ The compose file contains:
 - linuxserver/heimdall
 - tzahi12345/youtubedl-material
 
-The compose file in Monitoring contains:
+The compose file in [Monitoring](Services/Monitoring) contains:
 - netdata/netdata
 - grafana/grafana
 - prom/prometheus
