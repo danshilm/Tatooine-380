@@ -565,7 +565,7 @@ services:
     #     protocol: tcp
     #     mode: host
     volumes:
-      - $USERDIR/Services/Plex/config:/config
+      - $USERDIR/Services/Plex:/config
       - $THEVAULTDIR/PlexMediaServer/TvShows:/media/tvshows
       - $THEVAULTDIR/PlexMediaServer/Movies:/media/movies
       - $THEVAULTDIR/PlexMediaServer/Movies-4K:/movies-4K
@@ -722,13 +722,10 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Navidrome/config:/data
+      - $USERDIR/Services/Navidrome:/data
       - $THEVAULTDIR/PlexMediaServer/Music:/music:ro
-    # environment:
-    #   ND_SCANINTERVAL: 1m
-    #   ND_LOGLEVEL: info
-    #   ND_SESSIONTIMEOUT: 24h
-    #   ND_BASEURL: ""
+    environment:
+      ND_CONFIGFILE: "/data/navidrome.toml"
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -756,7 +753,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Overseer/config:/app/config
+      - $USERDIR/Services/Overseer:/app/config
     environment:
       - LOG_LEVEL=info
       - TZ=$TZ
@@ -902,10 +899,10 @@ services:
       - PGID=$PGID
       - PHP_TZ=$TZ
     volumes:
-      - $USERDIR/Services/Lychee/config/conf:/conf
-      - $USERDIR/Services/Lychee/config/uploads:/uploads
-      - $USERDIR/Services/Lychee/config/sym:/sym
-      - $USERDIR/Services/Lychee/config/import:/media/import
+      - $USERDIR/Services/Lychee/conf:/conf
+      - $USERDIR/Services/Lychee/uploads:/uploads
+      - $USERDIR/Services/Lychee/sym:/sym
+      - $USERDIR/Services/Lychee/import:/media/import
       - $THEVAULTDIR/Pictures:/media/Pictures
     ports:
       - target: 80
