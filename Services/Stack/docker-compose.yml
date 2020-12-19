@@ -743,12 +743,13 @@ services:
     image: sctx/overseerr:develop
     container_name: overseerr
     hostname: overseerr
+    user: "$PUID:PGID"
     security_opt: 
       - no-new-privileges:true
     networks:
       - t2_web
     ports:
-      - target: 3000
+      - target: 5055
         published: 5055
         protocol: tcp
         mode: host
@@ -767,7 +768,7 @@ services:
       - "traefik.http.routers.overseerr-rtr.middlewares=chain-no-auth@file"
       ## HTTP Services
       - "traefik.http.routers.overseerr-rtr.service=overseerr-svc"
-      - "traefik.http.services.overseerr-svc.loadbalancer.server.port=3000"
+      - "traefik.http.services.overseerr-svc.loadbalancer.server.port=5055"
     restart: unless-stopped
       
   db:
