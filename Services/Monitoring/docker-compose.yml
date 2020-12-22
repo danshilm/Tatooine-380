@@ -193,6 +193,30 @@ services:
       - "traefik.http.services.dozzle-svc.loadbalancer.server.port=8080"
     restart: unless-stopped
 
+  scrutiny:
+    image: analogj/scrutiny
+    container_name: scrutiny
+    hostname: scrutiny
+    security_opt: 
+      - no-new-privileges:true
+    cap_add:
+      - SYS_RAWIO
+    networks:
+      - t2_web
+    ports:
+      - target: 8080
+        published: 8580
+        protocol: tcp
+        mode: host
+    volumes:
+      - /run/udev:/run/udev:ro
+    devices:
+      - /dev/sda
+      - /dev/sdb
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
 networks:
   t2_web:
     external: true

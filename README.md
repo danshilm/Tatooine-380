@@ -38,6 +38,7 @@ The compose file in [Monitoring](Services/Monitoring) contains:
 - boerderij/varken
 - atribe/speedtest-for-influxdb-and-grafana
 - amir20/dozzle
+- analogj/scrutiny
 
 TODO:
 - [ ] Minify compose file and traefik labels
