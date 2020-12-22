@@ -51,7 +51,7 @@ services:
     hostname: grafana
     user: "$PUID:PGID"
     security_opt:
-      - no-new-privileges:true=
+      - no-new-privileges:true
     depends_on:
       - influxdb
       - varken
