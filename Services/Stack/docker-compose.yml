@@ -52,14 +52,14 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Stack/traefik2/traefik.toml:/etc/traefik/traefik.toml
-      - $USERDIR/Services/Stack/traefik2/rules:/rules # file provider directory
+      - ${USERDIR}/Services/Stack/traefik2/traefik.toml:/etc/traefik/traefik.toml
+      - ${USERDIR}/Services/Stack/traefik2/rules:/rules # file provider directory
       # - /var/run/docker.sock:/var/run/docker.sock:ro # use docker socket proxy for increased safety
-      - $USERDIR/Services/Stack/traefik2/acme.json:/acme.json # cert location - you must touch this file and change permissions to 600
-      - $USERDIR/Services/Stack/traefik2/logs:/logs
+      - ${USERDIR}/Services/Stack/traefik2/acme.json:/acme.json # cert location - you must touch this file and change permissions to 600
+      - ${USERDIR}/Services/Stack/traefik2/logs:/logs
     environment:
-      - CF_API_EMAIL=$CLOUDFLARE_EMAIL
-      - CF_API_KEY=$CLOUDFLARE_API_KEY
+      - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
+      - CF_API_KEY=${CLOUDFLARE_API_KEY}
     labels:
       - "traefik.enable=true"
       # HTTP-to-HTTPS Redirect
@@ -69,10 +69,10 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       # HTTP Routers
       - "traefik.http.routers.traefik-rtr.entrypoints=https"
-      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME`)"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAINNAME}`)"
       - "traefik.http.routers.traefik-rtr.tls=true"
-      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=$DOMAINNAME"
-      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=${DOMAINNAME}"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.${DOMAINNAME}"
       ## Services - API
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       ## Middlewares
@@ -99,17 +99,17 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Authelia/lib:/var/lib/authelia
-      - $USERDIR/Services/Authelia/configuration.yml:/config/configuration.yml:ro
-      - $USERDIR/Services/Authelia/users_database.yml:/etc/authelia/users_database.yml
-      # - $USERDIR/Services/Authelia/notification.txt:/tmp/authelia/notification.txt
+      - ${USERDIR}/Services/Authelia/lib:/var/lib/authelia
+      - ${USERDIR}/Services/Authelia/configuration.yml:/config/configuration.yml:ro
+      - ${USERDIR}/Services/Authelia/users_database.yml:/etc/authelia/users_database.yml
+      # - ${USERDIR}/Services/Authelia/notification.txt:/tmp/authelia/notification.txt
     environment:
-      - TZ=$TZ
+      - TZ=${TZ}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.authelia-rtr.entrypoints=https"
-      - "traefik.http.routers.authelia-rtr.rule=Host(`auth.$DOMAINNAME`)"
+      - "traefik.http.routers.authelia-rtr.rule=Host(`auth.${DOMAINNAME}`)"
       - "traefik.http.routers.authelia-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.authelia-rtr.middlewares=chain-authelia@file"
@@ -146,10 +146,10 @@ services:
         protocol: udp
         mode: host
     volumes:
-      - $USERDIR/Services/OpenVPN/vpn:/vpn
+      - ${USERDIR}/Services/OpenVPN/vpn:/vpn
       - /dev/net:/dev/net:z
     environment:
-      - TZ=$TZ
+      - TZ=${TZ}
     tmpfs:
       - /run
       - /tmp
@@ -166,21 +166,21 @@ services:
       - vpn
     network_mode: "service:vpn"
     volumes:
-      - $USERDIR/Services/qBitTorrent:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/blackhole_torrent:/blackhole_torrent
+      - ${USERDIR}/Services/qBitTorrent:/config
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_torrent:/blackhole_torrent
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK}
       - WEBUI_PORT=8100
     labels:
       - "traefik.enable=true"
        ## HTTP Routers
       - "traefik.http.routers.qbittorrent-rtr.entrypoints=https"
-      - "traefik.http.routers.qbittorrent-rtr.rule=Host(`qbit.$DOMAINNAME`)"
+      - "traefik.http.routers.qbittorrent-rtr.rule=Host(`qbit.${DOMAINNAME}`)"
       - "traefik.http.routers.qbittorrent-rtr.tls=true"
       ## Middlewares
       # it is not possible to disable authentication for the webUI of qbit, however, I disabled CSRF since it caused some white screen issues
@@ -204,24 +204,24 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Radarr:/config
-      - $USERDIR/Services/Shared/Radarr:/shared
-      - $THEVAULTDIR/PlexMediaServer/data:/data
+      - ${USERDIR}/Services/Radarr:/config
+      - ${USERDIR}/Services/Shared/Radarr:/shared
+      - ${THEVAULTDIR}/PlexMediaServer/data:/data
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.radarr-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.radarr-rtr-bypass.rule=Host(`radarr.$DOMAINNAME`) && Headers(`X-Api-Key`, `$RADARR_API_KEY`)"
+      - "traefik.http.routers.radarr-rtr-bypass.rule=Host(`radarr.${DOMAINNAME}`) && Headers(`X-Api-Key`, `${RADARR_API_KEY}`)"
       - "traefik.http.routers.radarr-rtr-bypass.tls=true"
       - "traefik.http.routers.radarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.radarr-rtr.entrypoints=https"
-      - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.$DOMAINNAME`)"
+      - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.${DOMAINNAME}`)"
       - "traefik.http.routers.radarr-rtr.tls=true"
       - "traefik.http.routers.radarr-rtr.priority=99"
       ## Middlewares
@@ -247,23 +247,23 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Sonarr:/config
-      - $THEVAULTDIR/PlexMediaServer/data:/data
+      - ${USERDIR}/Services/Sonarr:/config
+      - ${THEVAULTDIR}/PlexMediaServer/data:/data
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.sonarr-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.sonarr-rtr-bypass.rule=Host(`sonarr.$DOMAINNAME`) && (Headers(`X-Api-Key`, `$SONARR_API_KEY`) || Query(`apikey=$SONARR_API_KEY`))"
+      - "traefik.http.routers.sonarr-rtr-bypass.rule=Host(`sonarr.${DOMAINNAME}`) && (Headers(`X-Api-Key`, `${SONARR_API_KEY}`) || Query(`apikey=${SONARR_API_KEY}`))"
       - "traefik.http.routers.sonarr-rtr-bypass.tls=true"
       - "traefik.http.routers.sonarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.sonarr-rtr.entrypoints=https"
-      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$DOMAINNAME`)"
+      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.${DOMAINNAME}`)"
       - "traefik.http.routers.sonarr-rtr.tls=true"
       - "traefik.http.routers.sonarr-rtr.priority=99"
       ## Middlewares
@@ -289,23 +289,23 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Lidarr:/config
-      - $THEVAULTDIR/PlexMediaServer:/data
+      - ${USERDIR}/Services/Lidarr:/config
+      - ${THEVAULTDIR}/PlexMediaServer:/data
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.lidarr-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.lidarr-rtr-bypass.rule=Host(`lidarr.$DOMAINNAME`) && Headers(`X-Api-Key`, `$LIDARR_API_KEY`)"
+      - "traefik.http.routers.lidarr-rtr-bypass.rule=Host(`lidarr.${DOMAINNAME}`) && Headers(`X-Api-Key`, `${LIDARR_API_KEY}`)"
       - "traefik.http.routers.lidarr-rtr-bypass.tls=true"
       - "traefik.http.routers.lidarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.lidarr-rtr.entrypoints=https"
-      - "traefik.http.routers.lidarr-rtr.rule=Host(`lidarr.$DOMAINNAME`)"
+      - "traefik.http.routers.lidarr-rtr.rule=Host(`lidarr.${DOMAINNAME}`)"
       - "traefik.http.routers.lidarr-rtr.tls=true"
       - "traefik.http.routers.lidarr-rtr.priority=99"
       ## Middlewares
@@ -331,23 +331,23 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Bazarr:/config
-      - $THEVAULTDIR/PlexMediaServer:/data
+      - ${USERDIR}/Services/Bazarr:/config
+      - ${THEVAULTDIR}/PlexMediaServer:/data
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.bazarr-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.bazarr-rtr-bypass.rule=Host(`bazarr.$DOMAINNAME`) && Query(`apikey=$BAZARR_API_KEY`)"
+      - "traefik.http.routers.bazarr-rtr-bypass.rule=Host(`bazarr.${DOMAINNAME}`) && Query(`apikey=${BAZARR_API_KEY}`)"
       - "traefik.http.routers.bazarr-rtr-bypass.tls=true"
       - "traefik.http.routers.bazarr-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.bazarr-rtr.entrypoints=https"
-      - "traefik.http.routers.bazarr-rtr.rule=Host(`bazarr.$DOMAINNAME`)"
+      - "traefik.http.routers.bazarr-rtr.rule=Host(`bazarr.${DOMAINNAME}`)"
       - "traefik.http.routers.bazarr-rtr.tls=true"
       - "traefik.http.routers.bazarr-rtr.priority=99"
       ## Middlewares
@@ -372,18 +372,18 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Readarr:/config
-      - $THEVAULTDIR/PlexMediaServer:/data
+      - ${USERDIR}/Services/Readarr:/config
+      - ${THEVAULTDIR}/PlexMediaServer:/data
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.readarr-rtr.entrypoints=https"
-      - "traefik.http.routers.readarr-rtr.rule=Host(`readarr.$DOMAINNAME`)"
+      - "traefik.http.routers.readarr-rtr.rule=Host(`readarr.${DOMAINNAME}`)"
       - "traefik.http.routers.readarr-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.readarr-rtr.middlewares=chain-authelia@file"
@@ -406,26 +406,26 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Sabnzbd:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - $THEVAULTDIR/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
-      - $USERDIR/Services/Shared/Scripts:/Sabnzbd_scripts
-      - $USERDIR/Downloads/nzb_blackhole:/nzb_blackhole
+      - ${USERDIR}/Services/Sabnzbd:/config
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
+      - ${USERDIR}/Services/Shared/Scripts:/Sabnzbd_scripts
+      - ${USERDIR}/Downloads/nzb_blackhole:/nzb_blackhole
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.sabnzbd-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.sabnzbd-rtr-bypass.rule=Host(`sabnzbd.$DOMAINNAME`) && Query(`apikey=$SABNZBD_API_KEY`)"
+      - "traefik.http.routers.sabnzbd-rtr-bypass.rule=Host(`sabnzbd.${DOMAINNAME}`) && Query(`apikey=${SABNZBD_API_KEY}`)"
       - "traefik.http.routers.sabnzbd-rtr-bypass.tls=true"
       - "traefik.http.routers.sabnzbd-rtr-bypass.priority=100"
       ## HTTP Routers Auth
       - "traefik.http.routers.sabnzbd-rtr.entrypoints=https"
-      - "traefik.http.routers.sabnzbd-rtr.rule=Host(`sabnzbd.$DOMAINNAME`)"
+      - "traefik.http.routers.sabnzbd-rtr.rule=Host(`sabnzbd.${DOMAINNAME}`)"
       - "traefik.http.routers.sabnzbd-rtr.tls=true"
       - "traefik.http.routers.sabnzbd-rtr.priority=99"
       ## Middlewares
@@ -451,24 +451,24 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Jackett:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - $USERDIR/Downloads/torrent_blackhole:/torrent_blackhole
+      - ${USERDIR}/Services/Jackett:/config
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
+      - ${USERDIR}/Downloads/torrent_blackhole:/torrent_blackhole
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.jackett-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.jackett-rtr-bypass.rule=Host(`jackett.$DOMAINNAME`) && Query(`apikey=$JACKETT_API_KEY`)"
+      - "traefik.http.routers.jackett-rtr-bypass.rule=Host(`jackett.${DOMAINNAME}`) && Query(`apikey=${JACKETT_API_KEY}`)"
       - "traefik.http.routers.jackett-rtr-bypass.tls=true"
       - "traefik.http.routers.jackett-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.jackett-rtr.entrypoints=https"
-      - "traefik.http.routers.jackett-rtr.rule=Host(`jackett.$DOMAINNAME`)"
+      - "traefik.http.routers.jackett-rtr.rule=Host(`jackett.${DOMAINNAME}`)"
       - "traefik.http.routers.jackett-rtr.tls=true"
       - "traefik.http.routers.jackett-rtr.priority=99"
       ## Middlewares
@@ -493,25 +493,25 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/NzbHydra:/config
-      - $THEVAULTDIR/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - $THEVAULTDIR/Downloads/blackhole_torrent:/blackhole_torrent
-      - $THEVAULTDIR/Downloads/blackhole_nzb:/blackhole_nzb
+      - ${USERDIR}/Services/NzbHydra:/config
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
+      - ${THEVAULTDIR}/Downloads/blackhole_torrent:/blackhole_torrent
+      - ${THEVAULTDIR}/Downloads/blackhole_nzb:/blackhole_nzb
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.hydra-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.hydra-rtr-bypass.rule=Host(`nzbhydra.$DOMAINNAME`) && Query(`apikey=$HYDRA_API_KEY`)"
+      - "traefik.http.routers.hydra-rtr-bypass.rule=Host(`nzbhydra.${DOMAINNAME}`) && Query(`apikey=${HYDRA_API_KEY}`)"
       - "traefik.http.routers.hydra-rtr-bypass.tls=true"
       - "traefik.http.routers.hydra-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.hydra-rtr.entrypoints=https"
-      - "traefik.http.routers.hydra-rtr.rule=Host(`nzbhydra.$DOMAINNAME`)"
+      - "traefik.http.routers.hydra-rtr.rule=Host(`nzbhydra.${DOMAINNAME}`)"
       - "traefik.http.routers.hydra-rtr.tls=true"
       - "traefik.http.routers.hydra-rtr-bypass.priority=99"
       ## Middlewares
@@ -565,24 +565,24 @@ services:
     #     protocol: tcp
     #     mode: host
     volumes:
-      - $USERDIR/Services/Plex:/config
-      - $THEVAULTDIR/PlexMediaServer/TvShows:/media/tvshows
-      - $THEVAULTDIR/PlexMediaServer/Movies:/media/movies
-      - $THEVAULTDIR/PlexMediaServer/Movies-4K:/movies-4K
-      - $THEVAULTDIR/PlexMediaServer/Music:/media/music
-      - $THEVAULTDIR/PlexMediaServer/Anime:/media/anime
-      - $THEVAULTDIR/PlexMediaServer/DVR:/media/dvr
+      - ${USERDIR}/Services/Plex:/config
+      - ${THEVAULTDIR}/PlexMediaServer/TvShows:/media/tvshows
+      - ${THEVAULTDIR}/PlexMediaServer/Movies:/media/movies
+      - ${THEVAULTDIR}/PlexMediaServer/Movies-4K:/movies-4K
+      - ${THEVAULTDIR}/PlexMediaServer/Music:/media/music
+      - ${THEVAULTDIR}/PlexMediaServer/Anime:/media/anime
+      - ${THEVAULTDIR}/PlexMediaServer/DVR:/media/dvr
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - VERSION=docker
-      - UMASK_SET=022 #optional
+      - UMASK_SET=${UMASK} #optional
     # labels:
     #  - "traefik.enable=true"
     #  ## HTTP Routers
     #  - "traefik.http.routers.plex-rtr.entrypoints=https"
-    #  - "traefik.http.routers.plex-rtr.rule=Host(`plex.$DOMAINNAME`)"
+    #  - "traefik.http.routers.plex-rtr.rule=Host(`plex.${DOMAINNAME}`)"
     #  - "traefik.http.routers.plex-rtr.tls=true"
     #  ## Middlewares
     #  - "traefik.http.routers.plex-rtr.middlewares=chain-no-auth@file"
@@ -605,18 +605,18 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Tautulli:/config
-      - $USERDIR/Services/Plex/config/Library/Application Support/Plex Media Server/Logs:/Plex_logs
+      - ${USERDIR}/Services/Tautulli:/config
+      - ${USERDIR}/Services/Plex/config/Library/Application Support/Plex Media Server/Logs:/Plex_logs
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.tautulli-rtr.entrypoints=https"
-      - "traefik.http.routers.tautulli-rtr.rule=Host(`tautulli.$DOMAINNAME`)"
+      - "traefik.http.routers.tautulli-rtr.rule=Host(`tautulli.${DOMAINNAME}`)"
       - "traefik.http.routers.tautulli-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.tautulli-rtr.middlewares=chain-no-auth@file"
@@ -634,12 +634,12 @@ services:
   #   ports:
   #     - 8096:8096
   #   volumes:
-  #     - $USERDIR/Services/Jellyfin:/config
-  #     - $THEVAULTDIR/PlexMediaServer/TvShows:/data/tvshows
-  #     - $THEVAULTDIR/PlexMediaServer/Movies:/data/movies
-  #     - $THEVAULTDIR/PlexMediaServer/Music:/data/music
-  #     - $THEVAULTDIR/PlexMediaServer/Anime:/data/anime
-  #     - $THEVAULTDIR/PlexMediaServer/DVR:/data/dvr
+  #     - ${USERDIR}/Services/Jellyfin:/config
+  #     - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/tvshows
+  #     - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/movies
+  #     - ${THEVAULTDIR}/PlexMediaServer/Music:/data/music
+  #     - ${THEVAULTDIR}/PlexMediaServer/Anime:/data/anime
+  #     - ${THEVAULTDIR}/PlexMediaServer/DVR:/data/dvr
   #   #   - /opt/vc/lib:/opt/vc/lib #optional
   #   devices:
   #     - /dev/dri:/dev/dri #optional
@@ -648,14 +648,14 @@ services:
   #   #   - /dev/video11:/dev/video11 #optional
   #   #   - /dev/video12:/dev/video12 #optional
   #   environment:
-  #     - PUID=$PUID
-  #     - PGID=$PGID
-  #     - TZ=$TZ UMASK_SET=022 #optional
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ} UMASK_SET=${UMASK} #optional
   #   labels:
   #     - "traefik.enable=true"
   #     ## HTTP Routers
   #     - "traefik.http.routers.jellyfin-rtr.entrypoints=https"
-  #     - "traefik.http.routers.jellyfin-rtr.rule=Host(`jellyfin.$DOMAINNAME`)"
+  #     - "traefik.http.routers.jellyfin-rtr.rule=Host(`jellyfin.${DOMAINNAME}`)"
   #     - "traefik.http.routers.jellyfin-rtr.tls=true"
   #     ## Middlewares
   #     - "traefik.http.routers.jellyfin-rtr.middlewares=chain-no-auth@file"
@@ -677,28 +677,28 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Emby:/config
-      - $THEVAULTDIR/PlexMediaServer/TvShows:/data/tvshows
-      - $THEVAULTDIR/PlexMediaServer/Movies:/data/movies
-      - $THEVAULTDIR/PlexMediaServer/Movies-4K:/data/movies-4K
-      - $THEVAULTDIR/PlexMediaServer/Music:/data/music
-      - $THEVAULTDIR/PlexMediaServer/Anime:/data/anime
-      - $THEVAULTDIR/PlexMediaServer/DVR:/data/dvr
-      - $THEVAULTDIR/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+      - ${USERDIR}/Services/Emby:/config
+      - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/tvshows
+      - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/movies
+      - ${THEVAULTDIR}/PlexMediaServer/Movies-4K:/data/movies-4K
+      - ${THEVAULTDIR}/PlexMediaServer/Music:/data/music
+      - ${THEVAULTDIR}/PlexMediaServer/Anime:/data/anime
+      - ${THEVAULTDIR}/PlexMediaServer/DVR:/data/dvr
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
       # - /path/for/transcoding:/transcode #optional
       # - /opt/vc/lib:/opt/vc/lib #optional
     devices:
       - /dev/dri:/dev/dri #for VAAPI HW acceleration - Emby Premiere Only
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ #optional
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ} #optional
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.emby-rtr.entrypoints=https"
-      - "traefik.http.routers.emby-rtr.rule=Host(`emby.$DOMAINNAME`)"
+      - "traefik.http.routers.emby-rtr.rule=Host(`emby.${DOMAINNAME}`)"
       - "traefik.http.routers.emby-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.emby-rtr.middlewares=middlewares-rate-limit@file"
@@ -713,7 +713,7 @@ services:
     hostname: navidrome
     security_opt:
       - no-new-privileges:true
-    user: "$PUID:$PGID"
+    user: ${PUID}:${PGID}
     networks:
       - t2_web
     ports:
@@ -722,15 +722,15 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Navidrome:/data
-      - $THEVAULTDIR/PlexMediaServer/Music:/music:ro
+      - ${USERDIR}/Services/Navidrome:/data
+      - ${THEVAULTDIR}/PlexMediaServer/Music:/music:ro
     environment:
       ND_CONFIGFILE: "/data/navidrome.toml"
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.navidrome-rtr.entrypoints=https"
-      - "traefik.http.routers.navidrome-rtr.rule=Host(`navidrome.$DOMAINNAME`)"
+      - "traefik.http.routers.navidrome-rtr.rule=Host(`navidrome.${DOMAINNAME}`)"
       - "traefik.http.routers.navidrome-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.navidrome-rtr.middlewares=chain-no-auth@file"
@@ -743,7 +743,7 @@ services:
     image: sctx/overseerr:develop
     container_name: overseerr
     hostname: overseerr
-    user: "$PUID:PGID"
+    user: ${PUID}:PGID
     security_opt: 
       - no-new-privileges:true
     networks:
@@ -754,15 +754,15 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Overseer:/app/config
+      - ${USERDIR}/Services/Overseer:/app/config
     environment:
       - LOG_LEVEL=info
-      - TZ=$TZ
+      - TZ=${TZ}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.overseerr-rtr.entrypoints=https"
-      - "traefik.http.routers.overseerr-rtr.rule=Host(`overseerr.$DOMAINNAME`)"
+      - "traefik.http.routers.overseerr-rtr.rule=Host(`overseerr.${DOMAINNAME}`)"
       - "traefik.http.routers.overseerr-rtr.tls=true"
       # Middlewares
       - "traefik.http.routers.overseerr-rtr.middlewares=chain-no-auth@file"
@@ -780,7 +780,7 @@ services:
     networks:
       - t2_internal
     volumes:
-      - $USERDIR/Services/Filerun/db:/var/lib/mysql
+      - ${USERDIR}/Services/Filerun/db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: filerun 
@@ -825,8 +825,8 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Filerun/html:/var/www/html
-      - $USERDIR:/user-files
+      - ${USERDIR}/Services/Filerun/html:/var/www/html
+      - ${USERDIR}:/user-files
     environment:
       FR_DB_HOST: db
       FR_DB_PORT: 3306
@@ -834,14 +834,14 @@ services:
       FR_DB_USER: filerun
       FR_DB_PASS: password
       APACHE_RUN_USER: $USER
-      APACHE_RUN_USER_ID: $PUID
+      APACHE_RUN_USER_ID: ${PUID}
       APACHE_RUN_GROUP: $USER
-      APACHE_RUN_GROUP_ID: $PGID
+      APACHE_RUN_GROUP_ID: ${PGID}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.filerun-rtr.entrypoints=https"
-      - "traefik.http.routers.filerun-rtr.rule=Host(`filerun.$DOMAINNAME`)"
+      - "traefik.http.routers.filerun-rtr.rule=Host(`filerun.${DOMAINNAME}`)"
       - "traefik.http.routers.filerun-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.filerun-rtr.middlewares=chain-no-auth@file"
@@ -862,22 +862,22 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/YoutubeDL-Material/appdata:/app/appdata
-      - $USERDIR/Services/YoutubeDL-Material/audio:/app/audio
-      - $USERDIR/Services/YoutubeDL-Material/video:/app/video
-      - $USERDIR/Services/YoutubeDL-Material/subscriptions:/app/subscriptions
-      - $THEVAULTDIR/PlexMediaServer/Downloads/youtubedl:/app/users
+      - ${USERDIR}/Services/YoutubeDL-Material/appdata:/app/appdata
+      - ${USERDIR}/Services/YoutubeDL-Material/audio:/app/audio
+      - ${USERDIR}/Services/YoutubeDL-Material/video:/app/video
+      - ${USERDIR}/Services/YoutubeDL-Material/subscriptions:/app/subscriptions
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/youtubedl:/app/users
     environment: 
       - write_ytdl_config=true
       - ALLOW_CONFIG_MUTATIONS=true
       # unsure about which one, so I put both
-      - YTDL_UMASK=022
-      - UMASK_SET=022
+      - YTDL_UMASK=${UMASK}
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.youtubedl-rtr.entrypoints=https"
-      - "traefik.http.routers.youtubedl-rtr.rule=Host(`youtubedl.$DOMAINNAME`)"
+      - "traefik.http.routers.youtubedl-rtr.rule=Host(`youtubedl.${DOMAINNAME}`)"
       - "traefik.http.routers.youtubedl-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.youtubedl-rtr.middlewares=chain-no-auth@file"
@@ -896,15 +896,15 @@ services:
     # links:
     #   - db:db
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - PHP_TZ=$TZ
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PHP_TZ=${TZ}
     volumes:
-      - $USERDIR/Services/Lychee/conf:/conf
-      - $USERDIR/Services/Lychee/uploads:/uploads
-      - $USERDIR/Services/Lychee/sym:/sym
-      - $USERDIR/Services/Lychee/import:/media/import
-      - $THEVAULTDIR/Pictures:/media/Pictures
+      - ${USERDIR}/Services/Lychee/conf:/conf
+      - ${USERDIR}/Services/Lychee/uploads:/uploads
+      - ${USERDIR}/Services/Lychee/sym:/sym
+      - ${USERDIR}/Services/Lychee/import:/media/import
+      - ${THEVAULTDIR}/Pictures:/media/Pictures
     ports:
       - target: 80
         published: 380
@@ -914,7 +914,7 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.lychee-rtr.entrypoints=https"
-      - "traefik.http.routers.lychee-rtr.rule=Host(`lychee.$DOMAINNAME`)"
+      - "traefik.http.routers.lychee-rtr.rule=Host(`lychee.${DOMAINNAME}`)"
       - "traefik.http.routers.lychee-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.lychee-rtr.middlewares=chain-no-auth@file"
@@ -937,17 +937,17 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Heimdall:/config
+      - ${USERDIR}/Services/Heimdall:/config
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
-      - UMASK_SET=022 #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.heimdall-rtr.entrypoints=https"
-      - "traefik.http.routers.heimdall-rtr.rule=Host(`dashboard.$DOMAINNAME`)"
+      - "traefik.http.routers.heimdall-rtr.rule=Host(`dashboard.${DOMAINNAME}`)"
       - "traefik.http.routers.heimdall-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.heimdall-rtr.middlewares=chain-no-auth@file"

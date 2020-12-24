@@ -3,7 +3,7 @@ version: "3.7"
 services:
   # netdata:
   #   image: netdata/netdata
-  #   hostname: netdata.$DOMAINNAME
+  #   hostname: netdata.${DOMAINNAME}
   #   container_name: netdata
   #   security_opt:
   #     - apparmor:unconfined
@@ -25,18 +25,19 @@ services:
   #     - /sys:/host/sys:ro
   #     - /etc/os-release:/host/etc/os-release:ro
   #     - /var/log/smartd:/var/log/smartd
-  #     - $USERDIR/Services/Monitoring/netdata/config/netdata.conf:/etc/netdata/netdata.conf
-  #     - $USERDIR/Services/Monitoring/netdata/config/traefik.conf:/etc/netdata/python.d/traefik.conf
-  #     - $USERDIR/Services/Monitoring/netdata/config/smartd_log.conf:/etc/netdata/python.d/smartd_log.conf
+  #     - ${USERDIR}/Services/Monitoring/netdata/config/netdata.conf:/etc/netdata/netdata.conf
+  #     - ${USERDIR}/Services/Monitoring/netdata/config/traefik.conf:/etc/netdata/python.d/traefik.conf
+  #     - ${USERDIR}/Services/Monitoring/netdata/config/smartd_log.conf:/etc/netdata/python.d/smartd_log.conf
   #   environment:
   #     - DOCKER_HOST=dockerproxy:2375
-  #     - TZ=$TZ
-  #     - PGID=$PGID
+  #     - TZ=${TZ}
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
   #   labels:
   #     - "traefik.enable=true"
   #     ## HTTP Routers
   #     - "traefik.http.routers.netdata-rtr.entrypoints=https"
-  #     - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
+  #     - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.${DOMAINNAME}`)"
   #     - "traefik.http.routers.netdata-rtr.tls=true"
   #     ## Middlewares
   #     - "traefik.http.routers.netdata-rtr.middlewares=chain-authelia@file"
@@ -49,7 +50,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     hostname: grafana
-    user: "$PUID:PGID"
+    user: ${PUID}:{PGID}
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -63,7 +64,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Monitoring/grafana/:/config
+      - ${USERDIR}/Services/Monitoring/grafana/:/config
     environment:
       - GF_PATHS_DATA=/config/data
       - GF_PATHS_LOGS=/config/logs
@@ -73,7 +74,7 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.grafana-rtr.entrypoints=https"
-      - "traefik.http.routers.grafana-rtr.rule=Host(`grafana.$DOMAINNAME`)"
+      - "traefik.http.routers.grafana-rtr.rule=Host(`grafana.${DOMAINNAME}`)"
       - "traefik.http.routers.grafana-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.grafana-rtr.middlewares=chain-no-auth@file"
@@ -97,12 +98,12 @@ services:
   #       protocol: tcp
   #       mode: host
   #   volumes:
-  #     - $USERDIR/Services/Monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - ${USERDIR}/Services/Monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
   #   labels:
   #     - "traefik.enable=true"
   #     ## HTTP Routers
   #     - "traefik.http.routers.prometheus-rtr.entrypoints=https"
-  #     - "traefik.http.routers.prometheus-rtr.rule=Host(`prometheus.$DOMAINNAME`)"
+  #     - "traefik.http.routers.prometheus-rtr.rule=Host(`prometheus.${DOMAINNAME}`)"
   #     - "traefik.http.routers.prometheus-rtr.tls=true"
   #     ## Middlewares
   #     - "traefik.http.routers.prometheus-rtr.middlewares=chain-authelia@file"
@@ -129,15 +130,15 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - $USERDIR/Services/Monitoring/influxdb/lib:/var/lib/influxdb
-      - $USERDIR/Services/Monitoring/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ${USERDIR}/Services/Monitoring/influxdb/lib:/var/lib/influxdb
+      - ${USERDIR}/Services/Monitoring/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     restart: unless-stopped
 
   varken:
     hostname: varken
     container_name: varken
     image: boerderij/varken
-    # user: "PUID:PGID"
+    # user: {PUID}:{PGID}
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -145,7 +146,7 @@ services:
     networks:
       - t2_web
     volumes:
-      - $USERDIR/Services/Monitoring/varken/:/config
+      - ${USERDIR}/Services/Monitoring/varken/:/config
     environment:
       - TZ=Indian/Mauritius
     restart: unless-stopped
@@ -161,7 +162,7 @@ services:
     networks:
       - t2_web
     volumes:
-      - $USERDIR/Services/Monitoring/speedtest/config.ini:/src/config.ini
+      - ${USERDIR}/Services/Monitoring/speedtest/config.ini:/src/config.ini
     restart: unless-stopped
 
   dozzle:
@@ -184,7 +185,7 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers
       - "traefik.http.routers.dozzle-rtr.entrypoints=https"
-      - "traefik.http.routers.dozzle-rtr.rule=Host(`dozzle.$DOMAINNAME`)"
+      - "traefik.http.routers.dozzle-rtr.rule=Host(`dozzle.${DOMAINNAME}`)"
       - "traefik.http.routers.dozzle-rtr.tls=true"
       ## Middlewares
       - "traefik.http.routers.dozzle-rtr.middlewares=chain-authelia@file"

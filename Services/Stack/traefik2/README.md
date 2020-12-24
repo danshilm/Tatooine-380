@@ -9,7 +9,7 @@ To enable the collection of traefik metrics, simply modify the `[metrics]` optio
 To setup logrotate for the traefik logs daily, create a `traefik.conf` file in `/etc/logrotate.d/` and add these contents to the file:
 
 ```
-<$USERDIR>/Services/Stack/traefik2/logs/*.log {
+<${USERDIR}>/Services/Stack/traefik2/logs/*.log {
 	daily
 	rotate 14
 	compress
@@ -19,6 +19,6 @@ To setup logrotate for the traefik logs daily, create a `traefik.conf` file in `
 }
 ```
 
-Refer to the [`.env` file](../.env) for the `<$USERDIR>` and replace it here. 
+Refer to the [`.env` file](../.env) for the `<${USERDIR}>` and replace it here. 
 
 For more information about the directives used above, refer to the [man pages](https://linux.die.net/man/8/logrotate) of logrotate.
