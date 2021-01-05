@@ -790,8 +790,8 @@ services:
   
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    hostname: phpmyadmin
     container_name: phpmyadmin
+    hostname: phpmyadmin
     security_opt: 
       - no-new-privileges
     depends_on:
@@ -808,8 +808,8 @@ services:
 
   filerun:
     image: afian/filerun
-    hostname: filerun
     container_name: filerun
+    hostname: filerun
     security_opt: 
       - no-new-privileges:true
     depends_on:
@@ -848,6 +848,40 @@ services:
       ## HTTP Services
       - "traefik.http.routers.filerun-rtr.service=filerun-svc"
       - "traefik.http.services.filerun-svc.loadbalancer.server.port=80"
+    restart: unless-stopped
+  
+  ## Right now, nextcloud is only accessible from the traefik proxy and not on the local network. 
+  ## I still need to figure out how to make this work, but since I don't really use nextcloud and was only trying it out after I got fed up with it being glitchy and slow a few years ago, I wanted to try it out again
+  nextcloud:
+    image: linuxserver/nextcloud
+    container_name: nextcloud
+    hostname: nextcloud
+    security_opt: 
+      - no-new-privileges:true
+    networks:
+      - t2_web
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK} #optional
+    volumes:
+      - ${USERDIR}/Services/Nextcloud:/config
+      - ${USERDIR}/Documents:/data/Documents
+      - ${USERDIR}/Downloads:/data/Downloads
+      - ${USERDIR}/Services:/data/Services
+      - ${THEVAULTDIR}:/data/TheVault
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.nextcloud-rtr.entrypoints=https"
+      - "traefik.http.routers.nextcloud-rtr.rule=Host(`nextcloud.${DOMAINNAME}`)"
+      - "traefik.http.routers.nextcloud-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.nextcloud-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.nextcloud-rtr.service=nextcloud-svc"
+      - "traefik.http.services.nextcloud-svc.loadbalancer.server.port=80"
     restart: unless-stopped
 
   youtubedl-material:
