@@ -34,10 +34,10 @@
 
 [log]
   level = "DEBUG"
-  filePath = "/logs/log.log"
+  filePath = "/logs/traefik.log"
 
 [accessLog]
-  filePath = "/logs/accessLog.log"
+  filePath = "/logs/access.log"
   bufferingSize = 100
   [accessLog.filters]
     statusCodes = ["200", "300-302", "400-499"]
