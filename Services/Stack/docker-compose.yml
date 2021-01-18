@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   traefik2:
-    image: traefik:v2.2
+    image: traefik:v2.3.7
     container_name: traefik2
     hostname: traefik2
     security_opt:
@@ -86,7 +86,7 @@ services:
   #   restart: unless-stopped
 
   authelia:
-    image: authelia/authelia:latest
+    image: authelia/authelia
     container_name: authelia
     hostname: authelia
     security_opt: 
