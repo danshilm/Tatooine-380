@@ -42,6 +42,9 @@
   [accessLog.filters]
     statusCodes = ["200", "300-302", "400-499"]
     retryAttempts = true
+	[accessLog.fields]
+		[accessLog.fields.names]
+			"StartUTC" = "drop"
 
 [certificatesResolvers]
   [certificatesResolvers.default]

@@ -57,7 +57,9 @@ services:
       # - /var/run/docker.sock:/var/run/docker.sock:ro # use docker socket proxy for increased safety
       - ${USERDIR}/Services/Stack/traefik2/acme.json:/acme.json # cert location - you must touch this file and change permissions to 600
       - ${USERDIR}/Services/Stack/traefik2/logs:/logs
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro
     environment:
+      - TZ=${TZ}
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
       - CF_API_KEY=${CLOUDFLARE_API_KEY}
     labels:
