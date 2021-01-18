@@ -9,7 +9,7 @@ networks:
 services:
   # netdata:
   #   image: netdata/netdata
-  #   hostname: netdata.${DOMAINNAME}
+  #   hostname: netdata
   #   container_name: netdata
   #   security_opt:
   #     - apparmor:unconfined
@@ -154,7 +154,7 @@ services:
     volumes:
       - ${USERDIR}/Services/Monitoring/varken/:/config
     environment:
-      - TZ=Indian/Mauritius
+      - TZ=${TZ}
     restart: unless-stopped
 
   speedtest:
