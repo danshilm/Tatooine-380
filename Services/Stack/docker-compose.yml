@@ -1,15 +1,15 @@
 version: "3.7"
 
 networks:
-  t2_web:
+  web:
     external:
-      name: t2_web
-  t2_proxy:
+      name: web
+  proxy:
     external:
-      name: t2_proxy
-  t2_internal:
+      name: proxy
+  filerun:
     external:
-      name: t2_internal
+      name: filerun
 
 services:
   dockerproxy:
@@ -17,7 +17,7 @@ services:
     hostname: dockerproxy
     container_name: dockerproxy
     networks:
-      - t2_proxy
+      - proxy
     ports:
       - 127.0.0.1:2375:2375
     volumes:
@@ -32,11 +32,11 @@ services:
     hostname: traefik2
     security_opt:
       - no-new-privileges:true
-    depends_on: 
+    depends_on:
       - dockerproxy
     networks:
-      - t2_proxy
-      - t2_web
+      - proxy
+      - web
     ports:
       # https://www.reddit.com/r/docker/comments/c1wrep/traefik_reverse_proxy_question_docker_overlay
       - target: 80
@@ -79,22 +79,23 @@ services:
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       ## Middlewares
       - "traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file"
-    
+  
   # traefik-error-pages:
   #   image: "guillaumebriday/traefik-custom-error-pages"
   #   container_name: "traefik-error-pages"
   #   networks:
-  #     - t2_web
+  #     - web
   #   restart: unless-stopped
 
   authelia:
     image: authelia/authelia
     container_name: authelia
     hostname: authelia
-    security_opt: 
+    user: ${PUID}:${PGID}
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 9091
         published: 9091
@@ -125,7 +126,7 @@ services:
     container_name: vpn
     hostname: vpn
     command: -d
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
       - label:disable
     cap_add:
@@ -133,7 +134,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8100
         published: 8100
@@ -160,11 +161,11 @@ services:
   qbittorrent:
     image: linuxserver/qbittorrent
     container_name: qbittorrent
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     stdin_open: true
     tty: true
-    depends_on: 
+    depends_on:
       - vpn
     network_mode: "service:vpn"
     volumes:
@@ -196,10 +197,10 @@ services:
     image: linuxserver/radarr:nightly
     container_name: radarr
     hostname: radarr
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 7878
         published: 7878
@@ -213,7 +214,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -239,10 +240,10 @@ services:
     image: linuxserver/sonarr:preview
     container_name: sonarr
     hostname: sonarr
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8989
         published: 8989
@@ -255,7 +256,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -281,10 +282,10 @@ services:
     image: linuxserver/lidarr:nightly
     container_name: lidarr
     hostname: lidarr
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8686
         published: 8686
@@ -297,7 +298,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -323,10 +324,10 @@ services:
     image: linuxserver/bazarr
     container_name: bazarr
     hostname: bazarr
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 6767
         published: 6767
@@ -339,7 +340,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -364,10 +365,10 @@ services:
     image: hotio/readarr:nightly
     container_name: readarr
     hostname: readarr
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8787
         published: 8787
@@ -380,7 +381,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -393,15 +394,15 @@ services:
       - "traefik.http.routers.readarr-rtr.service=readarr-svc"
       - "traefik.http.services.readarr-svc.loadbalancer.server.port=8787"
     restart: unless-stopped
-  
+
   sabnzbd:
     image: linuxserver/sabnzbd
     container_name: sabnzbd
     hostname: sabnzbd
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8080
         published: 8180
@@ -417,7 +418,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -438,15 +439,15 @@ services:
       # - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
       - "traefik.http.services.sabnzbd-svc.loadbalancer.server.port=8080"
     restart: unless-stopped
-  
+
   jackett:
     image: linuxserver/jackett
     container_name: jackett
     hostname: jackett
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 9117
         published: 9117
@@ -460,7 +461,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -485,10 +486,10 @@ services:
     image: linuxserver/hydra2
     container_name: nzbhydra
     hostname: nzbhydra
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 5076
         published: 5076
@@ -503,7 +504,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -528,11 +529,11 @@ services:
     image: linuxserver/plex
     container_name: plex
     hostname: plex
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     network_mode: host
     # networks:
-    #   - t2_web
+    #   - web
     # ports:
     #   - target: 32400
     #     published: 32400
@@ -579,7 +580,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - VERSION=docker
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     # labels:
     #  - "traefik.enable=true"
     #  ## HTTP Routers
@@ -597,10 +598,10 @@ services:
     image: linuxserver/tautulli
     container_name: tautulli
     hostname: tautulli
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8181
         published: 8181
@@ -613,7 +614,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -632,7 +633,7 @@ services:
   #   container_name: jellyfin
   #   hostname: jellyfin
   #   networks:
-  #     - t2_web
+  #     - web
   #   ports:
   #     - 8096:8096
   #   volumes:
@@ -644,7 +645,7 @@ services:
   #     - ${THEVAULTDIR}/PlexMediaServer/DVR:/data/dvr
   #   #   - /opt/vc/lib:/opt/vc/lib #optional
   #   devices:
-  #     - /dev/dri:/dev/dri #optional
+  #     - /dev/dri:/dev/dri
   #   #   - /dev/vchiq:/dev/vchiq #optional
   #   #   - /dev/video10:/dev/video10 #optional
   #   #   - /dev/video11:/dev/video11 #optional
@@ -652,7 +653,8 @@ services:
   #   environment:
   #     - PUID=${PUID}
   #     - PGID=${PGID}
-  #     - TZ=${TZ} UMASK_SET=${UMASK} #optional
+  #     - TZ=${TZ}
+  #     - UMASK_SET=${UMASK}
   #   labels:
   #     - "traefik.enable=true"
   #     ## HTTP Routers
@@ -669,10 +671,10 @@ services:
     image: linuxserver/emby
     container_name: emby
     hostname: emby
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8096
         published: 8096
@@ -694,8 +696,8 @@ services:
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=${TZ} #optional
-      - UMASK_SET=${UMASK} #optional
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -717,7 +719,7 @@ services:
       - no-new-privileges:true
     user: ${PUID}:${PGID}
     networks:
-      - t2_web
+      - web
     ports:
       - target: 4533
         published: 4533
@@ -727,7 +729,7 @@ services:
       - ${USERDIR}/Services/Navidrome:/data
       - ${THEVAULTDIR}/PlexMediaServer/Music:/music:ro
     environment:
-      ND_CONFIGFILE: "/data/navidrome.toml"
+      - ND_CONFIGFILE=/data/navidrome.toml
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -746,10 +748,10 @@ services:
     container_name: overseerr
     hostname: overseerr
     user: ${PUID}:PGID
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 5055
         published: 5055
@@ -772,55 +774,53 @@ services:
       - "traefik.http.routers.overseerr-rtr.service=overseerr-svc"
       - "traefik.http.services.overseerr-svc.loadbalancer.server.port=5055"
     restart: unless-stopped
-      
-  db:
+    
+  filerun-db:
     image: mariadb:10.1
-    hostname: filerun_mariadb
-    container_name: filerun_mariadb
-    security_opt: 
+    hostname: filerun-db
+    container_name: filerun-db
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_internal
+      - filerun
     volumes:
       - ${USERDIR}/Services/Filerun/db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: filerun 
+      MYSQL_USER: filerun
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: filerun_db
     restart: always
-  
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     hostname: phpmyadmin
-    security_opt: 
+    security_opt:
       - no-new-privileges
     depends_on:
       - db
     networks:
-      - t2_internal
+      - filerun
     ports:
       - target: 80
         published: 480
         protocol: tcp
         mode: host
-    environment: 
+    environment:
       PMA_ARBITRARY: 1
 
   filerun:
     image: afian/filerun
     container_name: filerun
     hostname: filerun
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     depends_on:
-      - db
-    links:
-      - db:db
+      - filerun-db
     networks:
-      - t2_web
-      - t2_internal
+      - web
+      - filerun
     ports:
       - target: 80
         published: 280
@@ -828,16 +828,16 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Filerun/html:/var/www/html
-      - ${USERDIR}:/user-files
+      - ${THEVAULTDIR}:/user-files
     environment:
-      FR_DB_HOST: db
+      FR_DB_HOST: filerun-db
       FR_DB_PORT: 3306
       FR_DB_NAME: filerun_db
       FR_DB_USER: filerun
       FR_DB_PASS: password
-      APACHE_RUN_USER: $USER
+      APACHE_RUN_USER: ${USER}
       APACHE_RUN_USER_ID: ${PUID}
-      APACHE_RUN_GROUP: $USER
+      APACHE_RUN_GROUP: ${USER}
       APACHE_RUN_GROUP_ID: ${PGID}
     labels:
       - "traefik.enable=true"
@@ -851,22 +851,22 @@ services:
       - "traefik.http.routers.filerun-rtr.service=filerun-svc"
       - "traefik.http.services.filerun-svc.loadbalancer.server.port=80"
     restart: unless-stopped
-  
-  ## Right now, nextcloud is only accessible from the traefik proxy and not on the local network. 
+
+  ## Right now, nextcloud is only accessible from the traefik proxy and not on the local network.
   ## I still need to figure out how to make this work, but since I don't really use nextcloud and was only trying it out after I got fed up with it being glitchy and slow a few years ago, I wanted to try it out again
   nextcloud:
     image: linuxserver/nextcloud
     container_name: nextcloud
     hostname: nextcloud
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     volumes:
       - ${USERDIR}/Services/Nextcloud:/config
       - ${USERDIR}/Documents:/data/Documents
@@ -891,7 +891,7 @@ services:
     container_name: youtubedl-material
     hostname: youtubedl-material
     networks:
-      - t2_web
+      - web
     ports:
       - target: 17442
         published: 8998
@@ -903,7 +903,7 @@ services:
       - ${USERDIR}/Services/YoutubeDL-Material/video:/app/video
       - ${USERDIR}/Services/YoutubeDL-Material/subscriptions:/app/subscriptions
       - ${THEVAULTDIR}/PlexMediaServer/Downloads/youtubedl:/app/users
-    environment: 
+    environment:
       - write_ytdl_config=true
       - ALLOW_CONFIG_MUTATIONS=true
       # unsure about which one, so I put both
@@ -927,8 +927,8 @@ services:
     container_name: lychee
     hostname: lychee
     networks:
-      - t2_web
-      # - t2_internal # no need if using sqlite
+      - web
+      # - internal # no need if using sqlite
     # links:
     #   - db:db
     environment:
@@ -963,10 +963,10 @@ services:
     image: linuxserver/heimdall
     container_name: heimdall
     hostname: heimdall
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 80
         published: 180
@@ -978,7 +978,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=${UMASK} #optional
+      - UMASK_SET=${UMASK}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers

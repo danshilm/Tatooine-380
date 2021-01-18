@@ -23,7 +23,7 @@
     exposedByDefault = false
     swarmMode = false
     endpoint = "tcp://dockerproxy:2375"
-    network = "t2_web"
+    network = "web"
   [providers.file]
     directory = "/rules"
     filename = "/"

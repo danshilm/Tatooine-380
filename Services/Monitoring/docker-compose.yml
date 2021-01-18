@@ -1,9 +1,9 @@
 version: "3.7"
 
 networks:
-  t2_web:
+  web:
     external: true
-  t2_proxy:
+  proxy:
     external: true
 
 services:
@@ -19,8 +19,8 @@ services:
   #   depends_on:
   #     - dockerproxy
   #   networks:
-  #     - t2_proxy
-  #     - t2_web
+  #     - proxy
+  #     - web
   #   ports:
   #     - 19999:19999
   #     - 4242:4242 #for opentsdb backend
@@ -63,7 +63,7 @@ services:
       - influxdb
       - varken
     networks:
-      - t2_web
+      - web
     ports:
       - target: 3000
         published: 3100
@@ -97,7 +97,7 @@ services:
   #   security_opt:
   #     - no-new-privileges:true
   #   networks:
-  #     - t2_web
+  #     - web
   #   ports:
   #     - target: 9090
   #       published: 9190
@@ -125,7 +125,7 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8086
         published: 8086
@@ -150,7 +150,7 @@ services:
     depends_on:
       - influxdb
     networks:
-      - t2_web
+      - web
     volumes:
       - ${USERDIR}/Services/Monitoring/varken/:/config
     environment:
@@ -166,7 +166,7 @@ services:
     depends_on:
       - influxdb
     networks:
-      - t2_web
+      - web
     volumes:
       - ${USERDIR}/Services/Monitoring/speedtest/config.ini:/src/config.ini
     restart: unless-stopped
@@ -178,8 +178,8 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      - t2_web
-      - t2_proxy
+      - web
+      - proxy
     ports:
       - target: 8080
         published: 8280
@@ -204,12 +204,12 @@ services:
     image: analogj/scrutiny
     container_name: scrutiny
     hostname: scrutiny
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     cap_add:
       - SYS_RAWIO
     networks:
-      - t2_web
+      - web
     ports:
       - target: 8080
         published: 8580
