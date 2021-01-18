@@ -5,7 +5,7 @@ NOTE: The *rrs work with Nzb360.
 
 The compose file in [Stack](Services/Stack) contains:
 - [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy)
-- [traefik](https://github.com/traefik/traefik) v2.2
+- [traefik](https://github.com/traefik/traefik) v2.3.7
 - [authelia/authelia](https://github.com/authelia/authelia)
 - [dperson/openvpn-client](https://github.com/dperson/openvpn-client)
 - [linuxserver/qbittorrent](https://docs.linuxserver.io/images/docker-qbittorrent)
@@ -21,10 +21,10 @@ The compose file in [Stack](Services/Stack) contains:
 - [linuxserver/tautulli](https://docs.linuxserver.io/images/docker-tautulli)
 - [linuxserver/jellyfin](https://docs.linuxserver.io/images/docker-jellyfin)
 - [linuxserver/emby](https://docs.linuxserver.io/images/docker-emby)
-- [deluan/navidrome](https://github.com/deluan/navidrome/)
+- [deluan/navidrome](https://github.com/deluan/navidrome)
 - [sctx/overseerr](https://github.com/sct/overseerr)
 - [mariadb](https://hub.docker.com/_/mariadb) v10.1
-- [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin/)
+- [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin)
 - [afian/filerun](https://hub.docker.com/r/afian/filerun)
 - [linuxserver/nextcloud](https://docs.linuxserver.io/images/docker-nextcloud)
 - [lycheeorg/lychee](https://github.com/LycheeOrg/Lychee)

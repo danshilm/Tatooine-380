@@ -1,5 +1,11 @@
 version: "3.7"
 
+networks:
+  t2_web:
+    external: true
+  t2_proxy:
+    external: true
+
 services:
   # netdata:
   #   image: netdata/netdata
@@ -217,9 +223,3 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
-
-networks:
-  t2_web:
-    external: true
-  t2_proxy:
-    external: true
