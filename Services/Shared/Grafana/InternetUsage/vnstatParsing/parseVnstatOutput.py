@@ -11,7 +11,7 @@ payload = []
 
 def main(period):
 	if period == 'day':
-		with open('vnstatOutputTest.json', 'r') as read_file:
+		with open('vnstatOutput.json', 'r') as read_file:
 			data = json.load(read_file)
 
 			for one_period in data['interfaces'][0]['traffic'][period]:
