@@ -36,6 +36,7 @@ The JSON for my panel on my Grafana dashboard is:
     "x": 13,
     "y": 79
   },
+  "hideTimeOverride": true,
   "id": 242,
   "interval": "1h",
   "options": {
@@ -83,8 +84,8 @@ The JSON for my panel on my Grafana dashboard is:
       "tags": []
     }
   ],
+  "timeFrom": "7d",
   "type": "stat",
-  "timeFrom": null,
   "timeShift": null,
   "title": ""
 }
