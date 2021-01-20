@@ -25,7 +25,7 @@ The compose file in [Stack](Services/Stack) contains:
 - [sctx/overseerr](https://github.com/sct/overseerr)
 - [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin)
 - [afian/filerun](https://hub.docker.com/r/afian/filerun) + [mariadb](https://hub.docker.com/_/mariadb?tab=tags&page=1&ordering=-name&name=10.1) v10.1
-- [linuxserver/nextcloud](https://docs.linuxserver.io/images/docker-nextcloud)
+- [linuxserver/nextcloud](https://docs.linuxserver.io/images/docker-nextcloud) + [mariadb](https://hub.docker.com/_/mariadb?tab=tags&page=1&ordering=-name&name=10.5.8) v10.5.8
 - [lycheeorg/lychee](https://github.com/LycheeOrg/Lychee)
 - [linuxserver/heimdall](https://docs.linuxserver.io/images/docker-heimdall)
 - [tzahi12345/youtubedl-material](https://github.com/Tzahi12345/YoutubeDL-Material)

@@ -10,6 +10,9 @@ networks:
   filerun:
     external:
       name: filerun
+  filerun:
+    external:
+      name: nextcloud
 
 services:
   dockerproxy:
@@ -852,39 +855,57 @@ services:
       - "traefik.http.services.filerun-svc.loadbalancer.server.port=80"
     restart: unless-stopped
 
-  ## Right now, nextcloud is only accessible from the traefik proxy and not on the local network.
-  ## I still need to figure out how to make this work, but since I don't really use nextcloud and was only trying it out after I got fed up with it being glitchy and slow a few years ago, I wanted to try it out again
-  nextcloud:
-    image: linuxserver/nextcloud
-    container_name: nextcloud
-    hostname: nextcloud
-    security_opt:
-      - no-new-privileges:true
-    networks:
-      - web
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - ${USERDIR}/Services/Nextcloud:/config
-      - ${USERDIR}/Documents:/data/Documents
-      - ${USERDIR}/Downloads:/data/Downloads
-      - ${USERDIR}/Services:/data/Services
-      - ${THEVAULTDIR}:/data/TheVault
-    labels:
-      - "traefik.enable=true"
-      ## HTTP Routers
-      - "traefik.http.routers.nextcloud-rtr.entrypoints=https"
-      - "traefik.http.routers.nextcloud-rtr.rule=Host(`nextcloud.${DOMAINNAME}`)"
-      - "traefik.http.routers.nextcloud-rtr.tls=true"
-      ## Middlewares
-      - "traefik.http.routers.nextcloud-rtr.middlewares=chain-no-auth@file"
-      ## HTTP Services
-      - "traefik.http.routers.nextcloud-rtr.service=nextcloud-svc"
-      - "traefik.http.services.nextcloud-svc.loadbalancer.server.port=80"
-    restart: unless-stopped
+  # nextcloud-db:
+  #   image: mariadb:10.5.8
+  #   container_name: nextcloud-db
+  #   hostname: nextcloud-db
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   networks:
+  #     - nextcloud
+  #   volumes:
+  #     - ${USERDIR}/Services/Nextcloud/db:/var/lib/mysql
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root
+  #     - MYSQL_USER=nextcloud
+  #     - MYSQL_PASSWORD=password
+  #     - MYSQL_DATABASE=nextcloud_db
+  #   restart: always
+
+  # ## Right now, nextcloud is only accessible from the traefik proxy and not on the local network.
+  # ## I still need to figure out how to make this work, but since I don't really use nextcloud and was only trying it out after I got fed up with it being glitchy and slow a few years ago, I wanted to try it out again
+  # nextcloud:
+  #   image: linuxserver/nextcloud
+  #   container_name: nextcloud
+  #   hostname: nextcloud
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   networks:
+  #     - web
+  #     - nextcloud
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - ${USERDIR}/Services/Nextcloud/config:/config
+  #     - ${USERDIR}/Documents:/data/Documents
+  #     - ${USERDIR}/Downloads:/data/Downloads
+  #     - ${USERDIR}/Services:/data/Services
+  #     - ${THEVAULTDIR}:/data/TheVault
+  #   labels:
+  #     - "traefik.enable=true"
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.nextcloud-rtr.entrypoints=https"
+  #     - "traefik.http.routers.nextcloud-rtr.rule=Host(`nextcloud.${DOMAINNAME}`)"
+  #     - "traefik.http.routers.nextcloud-rtr.tls=true"
+  #     ## Middlewares
+  #     - "traefik.http.routers.nextcloud-rtr.middlewares=chain-no-auth@file"
+  #     ## HTTP Services
+  #     - "traefik.http.routers.nextcloud-rtr.service=nextcloud-svc"
+  #     - "traefik.http.services.nextcloud-svc.loadbalancer.server.port=80"
+  #   restart: unless-stopped
 
   youtubedl-material:
     image: tzahi12345/youtubedl-material
