@@ -158,7 +158,7 @@ services:
     restart: unless-stopped
 
   speedtest:
-    image: atribe/speedtest-for-influxdb-and-grafana
+    image: barrycarey/speedtest-for-influxdb-and-grafana
     container_name: speedtest
     hostname: speedtest
     security_opt:

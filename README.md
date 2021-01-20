@@ -23,9 +23,8 @@ The compose file in [Stack](Services/Stack) contains:
 - [linuxserver/emby](https://docs.linuxserver.io/images/docker-emby)
 - [deluan/navidrome](https://github.com/deluan/navidrome)
 - [sctx/overseerr](https://github.com/sct/overseerr)
-- [mariadb](https://hub.docker.com/_/mariadb) v10.1
 - [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin)
-- [afian/filerun](https://hub.docker.com/r/afian/filerun)
+- [afian/filerun](https://hub.docker.com/r/afian/filerun) + [mariadb](https://hub.docker.com/_/mariadb?tab=tags&page=1&ordering=-name&name=10.1) v10.1
 - [linuxserver/nextcloud](https://docs.linuxserver.io/images/docker-nextcloud)
 - [lycheeorg/lychee](https://github.com/LycheeOrg/Lychee)
 - [linuxserver/heimdall](https://docs.linuxserver.io/images/docker-heimdall)
