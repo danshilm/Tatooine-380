@@ -82,13 +82,24 @@ services:
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       ## Middlewares
       - "traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file"
-  
-  # traefik-error-pages:
-  #   image: "guillaumebriday/traefik-custom-error-pages"
-  #   container_name: "traefik-error-pages"
-  #   networks:
-  #     - web
-  #   restart: unless-stopped
+    
+  error-pages:
+    image: guillaumebriday/traefik-custom-error-pages
+    container_name: error-pages
+    hostname: error-pages
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+       ## HTTP Routers
+      - "traefik.http.routers.error-pages-rtr.entrypoints=https"
+      - "traefik.http.routers.error-pages-rtr.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.error-pages-rtr.tls=true"
+      - "traefik.http.routers.error-pages-rtr.priority=1"
+      ## HTTP Services
+      - "traefik.http.routers.error-pages-rtr.service=error-pages-svc"
+      - "traefik.http.services.error-pages-svc.loadbalancer.server.port=80"
+    restart: unless-stopped
 
   authelia:
     image: authelia/authelia

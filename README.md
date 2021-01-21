@@ -6,6 +6,7 @@ NOTE: The *rrs work with Nzb360.
 The compose file in [Stack](Services/Stack) contains:
 - [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy)
 - [traefik](https://github.com/traefik/traefik) v2.3.7
+- [traefik-custom-error-pages](https://github.com/guillaumebriday/traefik-custom-error-pages)
 - [authelia/authelia](https://github.com/authelia/authelia)
 - [dperson/openvpn-client](https://github.com/dperson/openvpn-client)
 - [linuxserver/qbittorrent](https://docs.linuxserver.io/images/docker-qbittorrent)
@@ -42,5 +43,4 @@ The compose file in [Monitoring](Services/Monitoring) contains:
 
 TODO:
 - [ ] Minify compose file and traefik labels
-- [ ] Adapt [guillaumebriday/traefik-custom-error-pages](https://github.com/guillaumebriday/traefik-custom-error-pages) for Traefik:v2.2 (refer to [this example](https://github.com/jamescurtin/traefik-proxy) on how to be clean)
 - [ ] Move sensitive stuff to docker secrets instead of .env
