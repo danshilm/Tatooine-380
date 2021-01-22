@@ -351,7 +351,6 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Bazarr:/config
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
       - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/Movies
       - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/TvShows
     environment:
@@ -585,6 +584,7 @@ services:
     #     mode: host
     volumes:
       - ${USERDIR}/Services/Plex:/config
+      - ${USERDIR}/Services/Shared:/shared
       - ${THEVAULTDIR}/PlexMediaServer:/data
     environment:
       - PUID=${PUID}
