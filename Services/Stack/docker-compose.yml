@@ -41,7 +41,6 @@ services:
       - proxy
       - web
     ports:
-      # https://www.reddit.com/r/docker/comments/c1wrep/traefik_reverse_proxy_question_docker_overlay
       - target: 80
         published: 80
         protocol: tcp
@@ -57,8 +56,7 @@ services:
     volumes:
       - ${USERDIR}/Services/Stack/traefik2/traefik.toml:/etc/traefik/traefik.toml
       - ${USERDIR}/Services/Stack/traefik2/rules:/rules # file provider directory
-      # - /var/run/docker.sock:/var/run/docker.sock:ro # use docker socket proxy for increased safety
-      - ${USERDIR}/Services/Stack/traefik2/acme.json:/acme.json # cert location - you must touch this file and change permissions to 600
+      - ${USERDIR}/Services/Stack/traefik2/acme.json:/acme.json # cert location - you must `touch` this file and change permissions to 600
       - ${USERDIR}/Services/Stack/traefik2/logs:/logs
       - /usr/share/zoneinfo:/usr/share/zoneinfo:ro
     environment:
@@ -184,9 +182,9 @@ services:
     network_mode: "service:vpn"
     volumes:
       - ${USERDIR}/Services/qBitTorrent:/config
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_torrent:/blackhole_torrent
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/Downloads/completed_downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/incomplete_downloads:/data/Downloads/incomplete_downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_torrent:/data/Downloads/blackhole_torrent
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -222,8 +220,9 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Radarr:/config
-      - ${USERDIR}/Services/Shared/Radarr:/shared
-      - ${THEVAULTDIR}/PlexMediaServer/data:/data
+      - ${USERDIR}/Services/Shared:/shared
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/Movies
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -265,7 +264,9 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Sonarr:/config
-      - ${THEVAULTDIR}/PlexMediaServer/data:/data
+      - ${USERDIR}/Services/Shared:/shared
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
+      - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/TvShows
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -307,7 +308,8 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Lidarr:/config
-      - ${THEVAULTDIR}/PlexMediaServer:/data
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Music:/data/Music
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -349,7 +351,9 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Bazarr:/config
-      - ${THEVAULTDIR}/PlexMediaServer:/data
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/Movies
+      - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/TvShows
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -390,7 +394,8 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Readarr:/config
-      - ${THEVAULTDIR}/PlexMediaServer:/data
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Readables:/data/Readables
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -424,10 +429,8 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Sabnzbd:/config
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/incomplete_downloads:/data/downloads/incomplete_downloads
-      - ${USERDIR}/Services/Shared/Scripts:/Sabnzbd_scripts
-      - ${USERDIR}/Downloads/nzb_blackhole:/nzb_blackhole
+      - ${USERDIR}/Services/Shared:/shared
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -469,8 +472,8 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Jackett:/config
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - ${USERDIR}/Downloads/torrent_blackhole:/torrent_blackhole
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/Downloads/completed_downloads
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_torrent:/data/Downloads/blackhole_torrent
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -511,9 +514,8 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/NzbHydra:/config
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads:/data/downloads/completed_downloads
-      - ${THEVAULTDIR}/Downloads/blackhole_torrent:/blackhole_torrent
-      - ${THEVAULTDIR}/Downloads/blackhole_nzb:/blackhole_nzb
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_torrent:/data/Downloads/blackhole_torrent
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_nzb:/data/Downloads/blackhole_nzb
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -583,12 +585,7 @@ services:
     #     mode: host
     volumes:
       - ${USERDIR}/Services/Plex:/config
-      - ${THEVAULTDIR}/PlexMediaServer/TvShows:/media/tvshows
-      - ${THEVAULTDIR}/PlexMediaServer/Movies:/media/movies
-      - ${THEVAULTDIR}/PlexMediaServer/Movies-4K:/movies-4K
-      - ${THEVAULTDIR}/PlexMediaServer/Music:/media/music
-      - ${THEVAULTDIR}/PlexMediaServer/Anime:/media/anime
-      - ${THEVAULTDIR}/PlexMediaServer/DVR:/media/dvr
+      - ${THEVAULTDIR}/PlexMediaServer:/data
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -652,11 +649,7 @@ services:
   #     - 8096:8096
   #   volumes:
   #     - ${USERDIR}/Services/Jellyfin:/config
-  #     - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/tvshows
-  #     - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/movies
-  #     - ${THEVAULTDIR}/PlexMediaServer/Music:/data/music
-  #     - ${THEVAULTDIR}/PlexMediaServer/Anime:/data/anime
-  #     - ${THEVAULTDIR}/PlexMediaServer/DVR:/data/dvr
+  #     - ${THEVAULTDIR}/PlexMediaServer:/data
   #   #   - /opt/vc/lib:/opt/vc/lib #optional
   #   devices:
   #     - /dev/dri:/dev/dri
@@ -696,13 +689,7 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Emby:/config
-      - ${THEVAULTDIR}/PlexMediaServer/TvShows:/data/tvshows
-      - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/movies
-      - ${THEVAULTDIR}/PlexMediaServer/Movies-4K:/data/movies-4K
-      - ${THEVAULTDIR}/PlexMediaServer/Music:/data/music
-      - ${THEVAULTDIR}/PlexMediaServer/Anime:/data/anime
-      - ${THEVAULTDIR}/PlexMediaServer/DVR:/data/dvr
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/recycle_bin:/recycle_bin
+      - ${THEVAULTDIR}/PlexMediaServer:/data
       # - /path/for/transcoding:/transcode #optional
       # - /opt/vc/lib:/opt/vc/lib #optional
     devices:
@@ -729,9 +716,9 @@ services:
     image: deluan/navidrome
     container_name: navidrome
     hostname: navidrome
+    user: ${PUID}:${PGID}
     security_opt:
       - no-new-privileges:true
-    user: ${PUID}:${PGID}
     networks:
       - web
     ports:
@@ -741,7 +728,7 @@ services:
         mode: host
     volumes:
       - ${USERDIR}/Services/Navidrome:/data
-      - ${THEVAULTDIR}/PlexMediaServer/Music:/music:ro
+      - ${THEVAULTDIR}/PlexMediaServer/Music:/data/Music:ro
     environment:
       - ND_CONFIGFILE=/data/navidrome.toml
     labels:
@@ -761,7 +748,7 @@ services:
     image: sctx/overseerr:develop
     container_name: overseerr
     hostname: overseerr
-    user: ${PUID}:PGID
+    user: ${PUID}:${PGID}
     security_opt:
       - no-new-privileges:true
     networks:
@@ -812,10 +799,9 @@ services:
     hostname: phpmyadmin
     security_opt:
       - no-new-privileges
-    depends_on:
-      - db
     networks:
       - filerun
+      # - nextcloud
     ports:
       - target: 80
         published: 480
@@ -936,11 +922,11 @@ services:
       - ${USERDIR}/Services/YoutubeDL-Material/subscriptions:/app/subscriptions
       - ${THEVAULTDIR}/PlexMediaServer/Downloads/youtubedl:/app/users
     environment:
-      - write_ytdl_config=true
+      - WRITE_YTDL_CONFIG=true
       - ALLOW_CONFIG_MUTATIONS=true
-      # unsure about which one, so I put both
       - YTDL_UMASK=${UMASK}
-      - UMASK=${UMASK}
+      - UID=${PUID}
+      - GID=${PGID}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -960,24 +946,21 @@ services:
     hostname: lychee
     networks:
       - web
-      # - internal # no need if using sqlite
-    # links:
-    #   - db:db
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - PHP_TZ=${TZ}
-    volumes:
-      - ${USERDIR}/Services/Lychee/conf:/conf
-      - ${USERDIR}/Services/Lychee/uploads:/uploads
-      - ${USERDIR}/Services/Lychee/sym:/sym
-      - ${USERDIR}/Services/Lychee/import:/media/import
-      - ${THEVAULTDIR}/Pictures:/media/Pictures
     ports:
       - target: 80
         published: 380
         protocol: tcp
         mode: host
+    volumes:
+      - ${USERDIR}/Services/Lychee/conf:/conf
+      - ${USERDIR}/Services/Lychee/uploads:/uploads
+      - ${USERDIR}/Services/Lychee/sym:/sym
+      - ${USERDIR}/Services/Lychee/import:/data/import
+      - ${THEVAULTDIR}/TheVault/Pictures:/data/Pictures
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PHP_TZ=${TZ}
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
