@@ -80,7 +80,14 @@ services:
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       ## Middlewares
       - "traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file"
-    
+    healthcheck:
+      test: wget -qO - http://localhost:8080/ping | grep 'OK' || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    restart: always
+
   error-pages:
     image: guillaumebriday/traefik-custom-error-pages
     container_name: error-pages
@@ -131,7 +138,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.authelia-rtr.service=authelia-svc"
       - "traefik.http.services.authelia-svc.loadbalancer.server.port=9091"
-    restart: unless-stopped
+    healthcheck:
+      test: wget -q -O - http://localhost:9091/api/state/ | grep '"status":"OK"' || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    restart: always
 
   vpn:
     image: dperson/openvpn-client
@@ -203,7 +216,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.qbittorrent-rtr.service=qbittorrent-svc"
       - "traefik.http.services.qbittorrent-svc.loadbalancer.server.port=8100"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8100/api/v2/app/version || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    restart: always
 
   radarr:
     image: linuxserver/radarr:nightly
@@ -247,7 +266,13 @@ services:
       - "traefik.http.routers.radarr-rtr.service=radarr-svc"
       - "traefik.http.routers.radarr-rtr-bypass.service=radarr-svc"
       - "traefik.http.services.radarr-svc.loadbalancer.server.port=7878"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:7878/api/system/status?apikey=${RADARR_API_KEY} || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   sonarr:
     image: linuxserver/sonarr:preview
@@ -291,7 +316,13 @@ services:
       - "traefik.http.routers.sonarr-rtr.service=sonarr-svc"
       - "traefik.http.routers.sonarr-rtr-bypass.service=sonarr-svc"
       - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
-    restart: unless-stopped
+     healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8989/api/system/status?apikey=${SONARR_API_KEY} || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   lidarr:
     image: linuxserver/lidarr:nightly
@@ -334,7 +365,13 @@ services:
       - "traefik.http.routers.lidarr-rtr.service=lidarr-svc"
       - "traefik.http.routers.lidarr-rtr-bypass.service=lidarr-svc"
       - "traefik.http.services.lidarr-svc.loadbalancer.server.port=8686"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8686/api/v1/system/status?apikey=${LIDARR_API_KEY} || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   bazarr:
     image: linuxserver/bazarr
@@ -376,7 +413,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.bazarr-rtr.service=bazarr-svc"
       - "traefik.http.services.bazarr-svc.loadbalancer.server.port=6767"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:6767/api/systemstatus?apikey=${BAZARR_API_KEY} || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   readarr:
     image: hotio/readarr:nightly
@@ -411,7 +454,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.readarr-rtr.service=readarr-svc"
       - "traefik.http.services.readarr-svc.loadbalancer.server.port=8787"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8787/api/v1/system/status?apikey=${READARR_API_KEY} || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   sabnzbd:
     image: linuxserver/sabnzbd
@@ -603,7 +652,13 @@ services:
     #  ## HTTP Services
     #  - "traefik.http.routers.plex-rtr.service=plex-svc"
     #  - "traefik.http.services.plex-svc.loadbalancer.server.port=32400"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:32400/identity || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   tautulli:
     image: linuxserver/tautulli
@@ -710,7 +765,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.emby-rtr.service=emby-svc"
       - "traefik.http.services.emby-svc.loadbalancer.server.port=8096"
-    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:8096/emby/system/info/public?format=json || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   navidrome:
     image: deluan/navidrome
@@ -742,7 +803,7 @@ services:
       ## HTTP Services
       - "traefik.http.routers.navidrome-rtr.service=navidrome-svc"
       - "traefik.http.services.navidrome-svc.loadbalancer.server.port=4533"
-    restart: unless-stopped
+    restart: always
 
   overseerr:
     image: sctx/overseerr:develop
@@ -774,7 +835,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.overseerr-rtr.service=overseerr-svc"
       - "traefik.http.services.overseerr-svc.loadbalancer.server.port=5055"
-    restart: unless-stopped
+    healthcheck:
+      test: wget http://localhost:5055/api/v1/status -qO /dev/null || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
     
   filerun-db:
     image: mariadb:10.1
@@ -972,7 +1039,13 @@ services:
       ## HTTP Services
       - "traefik.http.routers.lychee-rtr.service=lychee-svc"
       - "traefik.http.services.lychee-svc.loadbalancer.server.port=80"
-    restart: unless-stopped
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:80/ || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    restart: always
 
   heimdall:
     image: linuxserver/heimdall
@@ -987,6 +1060,8 @@ services:
         published: 180
         protocol: tcp
         mode: host
+    extra_hosts:
+      - "host.internal.docker:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Heimdall:/config
     environment:
