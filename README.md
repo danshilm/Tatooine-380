@@ -1,9 +1,11 @@
 # Tatooine-380
+
 A collection of scripts and dockers for my home media server.
 
-NOTE: The *rrs work with Nzb360.
+NOTE: The \*rrs work with Nzb360.
 
 The compose file in [Stack](Services/Stack) contains:
+
 - [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy)
 - [traefik](https://github.com/traefik/traefik) v2.3.7
 - [traefik-custom-error-pages](https://github.com/guillaumebriday/traefik-custom-error-pages)
@@ -32,6 +34,7 @@ The compose file in [Stack](Services/Stack) contains:
 - [tzahi12345/youtubedl-material](https://github.com/Tzahi12345/YoutubeDL-Material)
 
 The compose file in [Monitoring](Services/Monitoring) contains:
+
 - [netdata/netdata](https://github.com/netdata/netdata)
 - [grafana/grafana](https://github.com/grafana/grafana)
 - [prom/prometheus](https://github.com/prometheus/prometheus)
@@ -42,5 +45,6 @@ The compose file in [Monitoring](Services/Monitoring) contains:
 - [analogj/scrutiny](https://github.com/AnalogJ/scrutiny)
 
 TODO:
+
 - [ ] Minify compose file and traefik labels
 - [ ] Move sensitive stuff to docker secrets instead of .env
