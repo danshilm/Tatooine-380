@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
   traefik2:
-    image: traefik:v2.3.7
+    image: traefik:v2.4.8
     container_name: traefik2
     hostname: traefik2
     security_opt:
@@ -107,19 +107,13 @@ services:
     restart: unless-stopped
 
   authelia:
-    image: authelia/authelia
+    image: authelia/authelia:4.29.4
     container_name: authelia
     hostname: authelia
-    user: ${PUID}:${PGID}
     security_opt:
       - no-new-privileges:true
     networks:
       - web
-    ports:
-      - target: 9091
-        published: 9091
-        protocol: tcp
-        mode: host
     volumes:
       - ${USERDIR}/Services/Authelia/lib:/var/lib/authelia
       - ${USERDIR}/Services/Authelia/configuration.yml:/config/configuration.yml:ro

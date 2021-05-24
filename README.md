@@ -7,9 +7,9 @@ NOTE: The \*rrs work with Nzb360.
 The compose file in [Stack](Services/Stack) contains:
 
 - [tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy)
-- [traefik](https://github.com/traefik/traefik) v2.3.7
+- [traefik](https://github.com/traefik/traefik) v2.4.8
 - [traefik-custom-error-pages](https://github.com/guillaumebriday/traefik-custom-error-pages)
-- [authelia/authelia](https://github.com/authelia/authelia)
+- [authelia/authelia](https://github.com/authelia/authelia) v4.29.4
 - [dperson/openvpn-client](https://github.com/dperson/openvpn-client)
 - [linuxserver/qbittorrent](https://docs.linuxserver.io/images/docker-qbittorrent)
 - [linuxserver/radarr](https://docs.linuxserver.io/images/docker-radarr)
