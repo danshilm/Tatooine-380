@@ -2,7 +2,7 @@
 
 A collection of scripts and dockers for my home media server.
 
-NOTE: The \*rrs work with Nzb360.
+NOTE: The \*rrs and Tautulli work with [Nzb360](https://nzb360.com/) and [Lunasea](https://www.lunasea.app/).
 
 The compose file in [Stack](Services/Stack) contains:
 

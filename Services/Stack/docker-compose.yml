@@ -247,7 +247,7 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.radarr-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.radarr-rtr-bypass.rule=Host(`radarr.${DOMAINNAME}`) && Headers(`X-Api-Key`, `${RADARR_API_KEY}`)"
+      - "traefik.http.routers.radarr-rtr-bypass.rule=Host(`radarr.${DOMAINNAME}`) && (Headers(`X-Api-Key`, `${RADARR_API_KEY}`) || Query(`apikey=${RADARR_API_KEY}`))"
       - "traefik.http.routers.radarr-rtr-bypass.tls=true"
       - "traefik.http.routers.radarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
@@ -350,7 +350,7 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.lidarr-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.lidarr-rtr-bypass.rule=Host(`lidarr.${DOMAINNAME}`) && Headers(`X-Api-Key`, `${LIDARR_API_KEY}`)"
+      - "traefik.http.routers.lidarr-rtr-bypass.rule=Host(`lidarr.${DOMAINNAME}`) && (Headers(`X-Api-Key`, `${LIDARR_API_KEY}`) || Query(`apikey=${LIDARR_API_KEY}`))"
       - "traefik.http.routers.lidarr-rtr-bypass.tls=true"
       - "traefik.http.routers.lidarr-rtr-bypass.priority=100"
       ## HTTP Routers Auth
@@ -493,7 +493,7 @@ services:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
       - "traefik.http.routers.sabnzbd-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.sabnzbd-rtr-bypass.rule=Host(`sabnzbd.${DOMAINNAME}`) && Query(`apikey=${SABNZBD_API_KEY}`)"
+      - "traefik.http.routers.sabnzbd-rtr-bypass.rule=Host(`sabnzbd.${DOMAINNAME}`) && (Query(`apikey=${SABNZBD_API_KEY}`) || Query(`apikey=${SABNZBD_NZB_KEY}`))"
       - "traefik.http.routers.sabnzbd-rtr-bypass.tls=true"
       - "traefik.http.routers.sabnzbd-rtr-bypass.priority=100"
       ## HTTP Routers Auth
@@ -692,14 +692,22 @@ services:
       - UMASK=${UMASK}
     labels:
       - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.tautulli-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.tautulli-rtr-bypass.rule=Host(`tautulli.${DOMAINNAME}`) && Query(`apikey=${TAUTULLI_API_KEY}`)"
+      - "traefik.http.routers.tautulli-rtr-bypass.tls=true"
+      - "traefik.http.routers.tautulli-rtr-bypass.priority=100"
       ## HTTP Routers
       - "traefik.http.routers.tautulli-rtr.entrypoints=https"
       - "traefik.http.routers.tautulli-rtr.rule=Host(`tautulli.${DOMAINNAME}`)"
       - "traefik.http.routers.tautulli-rtr.tls=true"
+      - "traefik.http.routers.tautulli-rtr-bypass.priority=99"
       ## Middlewares
-      - "traefik.http.routers.tautulli-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.tautulli-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.tautulli-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.tautulli-rtr.service=tautulli-svc"
+      - "traefik.http.routers.tautulli-rtr-bypass.service=tautulli-svc"
       - "traefik.http.services.tautulli-svc.loadbalancer.server.port=8181"
     restart: unless-stopped
 
