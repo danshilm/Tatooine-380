@@ -15,30 +15,35 @@ The compose file in [Stack](Services/Stack) contains:
 - [linuxserver/radarr](https://docs.linuxserver.io/images/docker-radarr)
 - [linuxserver/sonarr](https://docs.linuxserver.io/images/docker-sonarr)
 - [linuxserver/lidarr](https://docs.linuxserver.io/images/docker-lidarr)
+- [randomninjaatk/amd](https://github.com/RandomNinjaAtk/docker-amd)
 - [linuxserver/bazarr](https://docs.linuxserver.io/images/docker-bazarr)
 - [hotio/readarr](https://github.com/Readarr/Readarr)
 - [linuxserver/sabnzbd](https://docs.linuxserver.io/images/docker-sabnzbd)
 - [linuxserver/jackett](https://docs.linuxserver.io/images/docker-jackett)
+- [flaresolverr/flaresolverr](https://github.com/FlareSolverr/FlareSolverr)
 - [linuxserver/nzbhydra](https://docs.linuxserver.io/images/docker-nzbhydra2)
+- [hotio/prowlarr](https://github.com/Prowlarr/Prowlarr/)
 - [linuxserver/plex](https://docs.linuxserver.io/images/docker-plex)
 - [linuxserver/tautulli](https://docs.linuxserver.io/images/docker-tautulli)
 - [linuxserver/jellyfin](https://docs.linuxserver.io/images/docker-jellyfin)
 - [linuxserver/emby](https://docs.linuxserver.io/images/docker-emby)
+- [linuxserver/embystat](https://docs.linuxserver.io/images/docker-embystat)
 - [deluan/navidrome](https://github.com/deluan/navidrome)
 - [sctx/overseerr](https://github.com/sct/overseerr)
 - [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin)
 - [afian/filerun](https://hub.docker.com/r/afian/filerun) + [mariadb](https://hub.docker.com/_/mariadb?tab=tags&page=1&ordering=-name&name=10.1) v10.1
 - [linuxserver/nextcloud](https://docs.linuxserver.io/images/docker-nextcloud) + [mariadb](https://hub.docker.com/_/mariadb?tab=tags&page=1&ordering=-name&name=10.5.8) v10.5.8
-- [lycheeorg/lychee](https://github.com/LycheeOrg/Lychee)
-- [linuxserver/heimdall](https://docs.linuxserver.io/images/docker-heimdall)
 - [tzahi12345/youtubedl-material](https://github.com/Tzahi12345/YoutubeDL-Material)
+- [lycheeorg/lychee](https://github.com/LycheeOrg/Lychee)
+- [b4bz/homer](https://github.com/bastienwirtz/homer) v21.03.2
+- [linuxserver/heimdall](https://docs.linuxserver.io/images/docker-heimdall)
 
 The compose file in [Monitoring](Services/Monitoring) contains:
 
 - [netdata/netdata](https://github.com/netdata/netdata)
 - [grafana/grafana](https://github.com/grafana/grafana)
 - [prom/prometheus](https://github.com/prometheus/prometheus)
-- [influxdb](https://github.com/influxdata/influxdb)
+- [influxdb](https://github.com/influxdata/influxdb) v1.8
 - [boerderij/varken](https://github.com/Boerderij/Varken)
 - [atribe/speedtest-for-influxdb-and-grafana](https://github.com/atribe/Speedtest-for-InfluxDB-and-Grafana)
 - [amir20/dozzle](https://github.com/amir20/dozzle)

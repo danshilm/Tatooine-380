@@ -26,7 +26,7 @@ services:
     ports:
       - 127.0.0.1:2375:2375
     volumes:
-     - /var/run/docker.sock:/var/run/docker.sock:ro
+     - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - CONTAINERS=1
     restart: always
@@ -64,6 +64,7 @@ services:
     environment:
       - TZ=${TZ}
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
+      ## Permissions: Zone.Zone Settings, Zone.Zone, Zone.DNS
       - CF_API_KEY=${CLOUDFLARE_API_KEY}
     labels:
       - "traefik.enable=true"
@@ -72,6 +73,7 @@ services:
       - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
       # HTTP Routers
       - "traefik.http.routers.traefik-rtr.entrypoints=https"
       - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.${DOMAINNAME}`)"
@@ -963,7 +965,7 @@ services:
     volumes:
       - ${USERDIR}/Services/Overseer:/app/config
     environment:
-      - LOG_LEVEL=info
+      - LOG_LEVEL=debug
       - TZ=${TZ}
     labels:
       - "traefik.enable=true"
