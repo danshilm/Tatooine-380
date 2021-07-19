@@ -27,7 +27,7 @@ services:
      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
-    restart: unless-stopped
+    restart: always
 
   traefik2:
     image: traefik:v2.4.8
@@ -175,7 +175,7 @@ services:
     tmpfs:
       - /run
       - /tmp
-    restart: unless-stopped
+    restart: always
 
   qbittorrent:
     image: linuxserver/qbittorrent
@@ -216,7 +216,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 30s
-    restart: always
+    restart: unless-stopped
 
   radarr:
     image: linuxserver/radarr:nightly
@@ -268,7 +268,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
 
   sonarr:
     image: linuxserver/sonarr:develop
@@ -320,7 +320,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
 
   lidarr:
     image: linuxserver/lidarr:nightly
@@ -371,7 +371,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
 
   bazarr:
     image: linuxserver/bazarr
@@ -422,7 +422,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
 
   readarr:
     image: hotio/readarr:nightly
@@ -465,7 +465,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
 
   sabnzbd:
     image: linuxserver/sabnzbd
@@ -506,7 +506,7 @@ services:
       - "traefik.http.routers.sabnzbd-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.sabnzbd-rtr.service=sabnzbd-svc"
-      # - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
+      - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
       - "traefik.http.services.sabnzbd-svc.loadbalancer.server.port=8080"
     restart: unless-stopped
 
@@ -549,6 +549,7 @@ services:
       - "traefik.http.routers.jackett-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.jackett-rtr.service=jackett-svc"
+      - "traefik.http.routers.jackett-rtr-bypass.service=jackett-svc"
       - "traefik.http.services.jackett-svc.loadbalancer.server.port=9117"
     restart: unless-stopped
 
@@ -664,7 +665,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
 
   tautulli:
     image: linuxserver/tautulli
@@ -709,7 +710,10 @@ services:
   #   networks:
   #     - web
   #   ports:
-  #     - 8096:8096
+  #     - target: 8096
+  #       published: 8096
+  #       protocol: tcp
+  #       mode: host
   #   volumes:
   #     - ${USERDIR}/Services/Jellyfin:/config
   #     - ${THEVAULTDIR}/PlexMediaServer:/data
@@ -736,6 +740,7 @@ services:
   #     ## HTTP Services
   #     - "traefik.http.routers.jellyfin-rtr.service=jellyfin-svc"
   #     - "traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096"
+  #   restart: unless-stopped
 
   emby:
     image: linuxserver/emby
@@ -811,7 +816,7 @@ services:
       ## HTTP Services
       - "traefik.http.routers.navidrome-rtr.service=navidrome-svc"
       - "traefik.http.services.navidrome-svc.loadbalancer.server.port=4533"
-    restart: always
+    restart: unless-stopped
 
   overseerr:
     image: sctx/overseerr:develop
@@ -851,12 +856,12 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
-    restart: always
+    restart: unless-stopped
     
   filerun-db:
     image: mariadb:10.1
-    hostname: filerun-db
     container_name: filerun-db
+    hostname: filerun-db
     security_opt:
       - no-new-privileges:true
     networks:
@@ -868,7 +873,7 @@ services:
       MYSQL_USER: filerun
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: filerun_db
-    restart: always
+    restart: unless-stopped
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -885,7 +890,7 @@ services:
         protocol: tcp
         mode: host
     environment:
-      PMA_ARBITRARY: 1
+      - PMA_ARBITRARY=1
 
   filerun:
     image: afian/filerun
@@ -944,7 +949,7 @@ services:
   #     - MYSQL_USER=nextcloud
   #     - MYSQL_PASSWORD=password
   #     - MYSQL_DATABASE=nextcloud_db
-  #   restart: always
+  #   restart: unless-stopped
 
   # ## Right now, nextcloud is only accessible from the traefik proxy and not on the local network.
   # ## I still need to figure out how to make this work, but since I don't really use nextcloud and was only trying it out after I got fed up with it being glitchy and slow a few years ago, I wanted to try it out again
