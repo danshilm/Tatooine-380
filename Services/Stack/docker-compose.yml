@@ -882,6 +882,38 @@ services:
       start_period: 20s
     restart: always
 
+  embystat:
+    image: linuxserver/embystat
+    container_name: embystat
+    hostname: embystat
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+    ports:
+      - target: 6555
+        published: 6555
+        protocol: tcp
+        mode: host
+    volumes:
+      - ${USERDIR}/Services/EmbyStat:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.embystat-rtr.entrypoints=https"
+      - "traefik.http.routers.embystat-rtr.rule=Host(`embystat.${DOMAINNAME}`)"
+      - "traefik.http.routers.embystat-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.embystat-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.embystat-rtr.service=embystat-svc"
+      - "traefik.http.services.embystat-svc.loadbalancer.server.port=6555"
+    restart: unless-stopped
+
   navidrome:
     image: deluan/navidrome
     container_name: navidrome
