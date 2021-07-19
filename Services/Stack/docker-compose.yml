@@ -335,6 +335,7 @@ services:
       - ${USERDIR}/Services/Lidarr:/config
       - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
       - ${THEVAULTDIR}/PlexMediaServer/Music:/data/Music
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads/lidarr-amd:/downloads-amd
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -365,6 +366,49 @@ services:
       timeout: 15s
       retries: 3
       start_period: 20s
+    restart: unless-stopped
+
+  amd:
+    image: randomninjaatk/amd 
+    container_name: amd
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - web
+    volumes:
+      - ${USERDIR}/Services/AutomatedMusicDownloader:/config
+      - ${THEVAULTDIR}/PlexMediaServer/Downloads/completed_downloads/lidarr-amd:/downloads-amd
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - AUTOSTART=true
+      - SCRIPTINTERVAL=1h
+      - DOWNLOADMODE=wanted
+      - FALLBACKSEARCH=True
+      - LIST=both
+      - SearchType=both
+      - Concurrency=3
+      - EMBEDDED_COVER_QUALITY=80
+      - FORMAT=FLAC
+      - BITRATE=320
+      - ENABLEPOSTPROCESSING=true
+      - FORCECONVERT=false
+      - requirequality=false
+      - MatchDistance=10
+      - replaygain=true
+      - FolderPermissions=766
+      - FilePermissions=666
+      - MBRAINZMIRROR=https://musicbrainz.org
+      - MBRATELIMIT=1
+      - LidarrUrl=http://lidarr:8686
+      - LidarrAPIkey=${LIDARR_API_KEY}
+      - ARL_TOKEN=${ARL_TOKEN}
+      - NOTIFYPLEX=false
+      - PLEXLIBRARYNAME=Music
+      - PLEXURL=http://plex:32400
+      - PLEXTOKEN=${PLEX_TOKEN}
+      - ALBUM_TYPE_FILTER=COMPILE
+      - POSTPROCESSTHREADS=1
     restart: unless-stopped
 
   bazarr:
