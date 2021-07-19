@@ -263,7 +263,7 @@ services:
       - "traefik.http.routers.radarr-rtr-bypass.service=radarr-svc"
       - "traefik.http.services.radarr-svc.loadbalancer.server.port=7878"
     healthcheck:
-      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:7878/api/system/status?apikey=${RADARR_API_KEY} || exit 1
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:7878/api/v3/system/status?apikey=${RADARR_API_KEY} || exit 1
       interval: 1m30s
       timeout: 15s
       retries: 3
@@ -271,7 +271,7 @@ services:
     restart: always
 
   sonarr:
-    image: linuxserver/sonarr:preview
+    image: linuxserver/sonarr:develop
     container_name: sonarr
     hostname: sonarr
     security_opt:
@@ -315,7 +315,7 @@ services:
       - "traefik.http.routers.sonarr-rtr-bypass.service=sonarr-svc"
       - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
      healthcheck:
-      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8989/api/system/status?apikey=${SONARR_API_KEY} || exit 1
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8989/api/v3/system/status?apikey=${SONARR_API_KEY} || exit 1
       interval: 1m30s
       timeout: 15s
       retries: 3
@@ -414,9 +414,10 @@ services:
       - "traefik.http.routers.bazarr-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
       - "traefik.http.routers.bazarr-rtr.service=bazarr-svc"
+      - "traefik.http.routers.bazarr-rtr-bypass.service=bazarr-svc"
       - "traefik.http.services.bazarr-svc.loadbalancer.server.port=6767"
     healthcheck:
-      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:6767/api/systemstatus?apikey=${BAZARR_API_KEY} || exit 1
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:6767/api/system/status?apikey=${BAZARR_API_KEY} || exit 1
       interval: 1m30s
       timeout: 15s
       retries: 3
@@ -552,7 +553,7 @@ services:
     restart: unless-stopped
 
   nzbhydra:
-    image: linuxserver/hydra2
+    image: linuxserver/nzbhydra2
     container_name: nzbhydra
     hostname: nzbhydra
     security_opt:
@@ -576,21 +577,22 @@ services:
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
-      - "traefik.http.routers.hydra-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.hydra-rtr-bypass.rule=Host(`nzbhydra.${DOMAINNAME}`) && Query(`apikey=${HYDRA_API_KEY}`)"
-      - "traefik.http.routers.hydra-rtr-bypass.tls=true"
-      - "traefik.http.routers.hydra-rtr-bypass.priority=100"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.rule=Host(`nzbhydra.${DOMAINNAME}`) && Query(`apikey=${NZBHYDRA_API_KEY}`)"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.tls=true"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.priority=100"
       ## HTTP Routers
-      - "traefik.http.routers.hydra-rtr.entrypoints=https"
-      - "traefik.http.routers.hydra-rtr.rule=Host(`nzbhydra.${DOMAINNAME}`)"
-      - "traefik.http.routers.hydra-rtr.tls=true"
-      - "traefik.http.routers.hydra-rtr-bypass.priority=99"
+      - "traefik.http.routers.nzbhydra-rtr.entrypoints=https"
+      - "traefik.http.routers.nzbhydra-rtr.rule=Host(`nzbhydra.${DOMAINNAME}`)"
+      - "traefik.http.routers.nzbhydra-rtr.tls=true"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.priority=99"
       ## Middlewares
-      - "traefik.http.routers.hydra-rtr-bypass.middlewares=chain-no-auth@file"
-      - "traefik.http.routers.hydra-rtr.middlewares=chain-authelia@file"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.nzbhydra-rtr.middlewares=chain-authelia@file"
       ## HTTP Services
-      - "traefik.http.routers.hydra-rtr.service=hydra-svc"
-      - "traefik.http.services.hydra-svc.loadbalancer.server.port=5076"
+      - "traefik.http.routers.nzbhydra-rtr.service=nzbhydra-svc"
+      - "traefik.http.routers.nzbhydra-rtr-bypass.service=nzbhydra-svc"
+      - "traefik.http.services.nzbhydra-svc.loadbalancer.server.port=5076"
     restart: unless-stopped
 
   plex:
@@ -910,9 +912,9 @@ services:
       FR_DB_NAME: filerun_db
       FR_DB_USER: filerun
       FR_DB_PASS: password
-      APACHE_RUN_USER: ${USER}
+      APACHE_RUN_USER: ${USERNAME}
       APACHE_RUN_USER_ID: ${PUID}
-      APACHE_RUN_GROUP: ${USER}
+      APACHE_RUN_GROUP: ${USERNAME}
       APACHE_RUN_GROUP_ID: ${PGID}
     labels:
       - "traefik.enable=true"
