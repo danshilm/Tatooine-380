@@ -630,6 +630,45 @@ services:
       - "traefik.http.services.nzbhydra-svc.loadbalancer.server.port=5076"
     restart: unless-stopped
 
+  prowlarr:
+    image: hotio/prowlarr:nightly
+    container_name: prowlarr
+    hostname: prowlarr
+    networks:
+      - web
+    ports:
+      - target: 9696
+        published: 9696
+        protocol: tcp
+        mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - ${USERDIR}/Services/Prowlarr:/config
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      - "traefik.http.routers.prowlarr-rtr-bypass.entrypoints=https"
+      - "traefik.http.routers.prowlarr-rtr-bypass.rule=Host(`prowlarr.${DOMAINNAME}`) && Query(`apikey=${PROWLARR_API_KEY}`)"
+      - "traefik.http.routers.prowlarr-rtr-bypass.tls=true"
+      - "traefik.http.routers.prowlarr-rtr-bypass.priority=100"
+      ## HTTP Routers
+      - "traefik.http.routers.prowlarr-rtr.entrypoints=https"
+      - "traefik.http.routers.prowlarr-rtr.rule=Host(`prowlarr.${DOMAINNAME}`)"
+      - "traefik.http.routers.prowlarr-rtr.tls=true"
+      - "traefik.http.routers.prowlarr-rtr-bypass.priority=99"
+      ## Middlewares
+      - "traefik.http.routers.prowlarr-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.prowlarr-rtr.middlewares=chain-authelia@file"
+      ## HTTP Services
+      - "traefik.http.routers.prowlarr-rtr.service=prowlarr-svc"
+      - "traefik.http.routers.prowlarr-rtr-bypass.service=prowlarr-svc"
+      - "traefik.http.services.prowlarr-svc.loadbalancer.server.port=9696"
+    restart: unless-stopped
+
   plex:
     image: linuxserver/plex
     container_name: plex
