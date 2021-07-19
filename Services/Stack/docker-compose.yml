@@ -2,17 +2,17 @@ version: "3.7"
 
 networks:
   web:
-    external:
-      name: web
+    name: web
+    external: true
   proxy:
-    external:
-      name: proxy
+    name: proxy
+    external: true
   filerun:
-    external:
-      name: filerun
-  filerun:
-    external:
-      name: nextcloud
+    name: filerun
+    internal: true
+  # nextcloud:
+  #   name: nextcloud
+  #   internal: true
   flaresolverr:
     name: flaresolverr
 
