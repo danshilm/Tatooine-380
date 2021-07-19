@@ -416,7 +416,7 @@ services:
     restart: unless-stopped
 
   bazarr:
-    image: linuxserver/bazarr
+    image: linuxserver/bazarr:development
     container_name: bazarr
     hostname: bazarr
     security_opt:
@@ -917,7 +917,7 @@ services:
     restart: unless-stopped
 
   navidrome:
-    image: deluan/navidrome
+    image: deluan/navidrome:develop
     container_name: navidrome
     hostname: navidrome
     user: ${PUID}:${PGID}
@@ -931,10 +931,12 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - ${USERDIR}/Services/Navidrome:/data
+      - ${USERDIR}/Services/Navidrome:/config
       - ${THEVAULTDIR}/PlexMediaServer/Music:/data/Music:ro
     environment:
-      - ND_CONFIGFILE=/data/navidrome.toml
+      - ND_CONFIGFILE=/config/navidrome.toml
+      - ND_DATAFOLDER=/config
+      - ND_MUSICFOLDER=/data/Music
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -949,7 +951,7 @@ services:
     restart: unless-stopped
 
   overseerr:
-    image: sctx/overseerr:develop
+    image: ghcr.io/sct/overseerr:develop
     container_name: overseerr
     hostname: overseerr
     user: ${PUID}:${PGID}
