@@ -13,6 +13,8 @@ networks:
   filerun:
     external:
       name: nextcloud
+  flaresolverr:
+    name: flaresolverr
 
 services:
   dockerproxy:
@@ -552,6 +554,7 @@ services:
       - no-new-privileges:true
     networks:
       - web
+      - flaresolverr
     ports:
       - target: 9117
         published: 9117
@@ -585,6 +588,18 @@ services:
       - "traefik.http.routers.jackett-rtr.service=jackett-svc"
       - "traefik.http.routers.jackett-rtr-bypass.service=jackett-svc"
       - "traefik.http.services.jackett-svc.loadbalancer.server.port=9117"
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=${TZ}
+    networks:
+      - flaresolverr
     restart: unless-stopped
 
   nzbhydra:
