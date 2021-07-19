@@ -231,8 +231,6 @@ services:
         published: 7878
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Radarr:/config
       - ${USERDIR}/Services/Shared:/shared
@@ -283,8 +281,6 @@ services:
         published: 8989
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Sonarr:/config
       - ${USERDIR}/Services/Shared:/shared
@@ -335,8 +331,6 @@ services:
         published: 8686
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Lidarr:/config
       - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
@@ -386,8 +380,6 @@ services:
         published: 6767
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Bazarr:/config
       - ${THEVAULTDIR}/PlexMediaServer/Movies:/data/Movies
@@ -437,8 +429,6 @@ services:
         published: 8787
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Readarr:/config
       - ${THEVAULTDIR}/PlexMediaServer/Downloads:/data/Downloads
@@ -602,27 +592,29 @@ services:
     hostname: plex
     security_opt:
       - no-new-privileges:true
-    network_mode: host
-    # networks:
-    #   - web
-    # ports:
-    #   - target: 32400
-    #     published: 32400
-    #     protocol: tcp
-    #     mode: host
-    #   - target: 32410
+    ## If not using host networking mode, enter your plex subdomain in the "Custom server access URLs" in Plex settings, then turn off remote access.
+    ## You also don't need to port forward port 34200 that way, everything uses the plex subdomain
+    # network_mode: host
+    networks:
+      - web
+    ports:
+      - target: 32400
+        published: 32400
+        protocol: tcp
+        mode: host
+    #   - target: 32410 # GSM network discovery
     #     published: 32410
     #     protocol: udp
     #     mode: host
-    #   - target: 32412
+    #   - target: 32412 # GSM network discovery
     #     published: 32412
     #     protocol: udp
     #     mode: host
-    #   - target: 32413
+    #   - target: 32413 # GSM network discovery
     #     published: 32413
     #     protocol: udp
     #     mode: host
-    #   - target: 32414
+    #   - target: 32414 # GSM network discovery
     #     published: 32414
     #     protocol: udp
     #     mode: host
@@ -648,17 +640,17 @@ services:
       - TZ=${TZ}
       - VERSION=docker
       - UMASK=${UMASK}
-    # labels:
-    #  - "traefik.enable=true"
-    #  ## HTTP Routers
-    #  - "traefik.http.routers.plex-rtr.entrypoints=https"
-    #  - "traefik.http.routers.plex-rtr.rule=Host(`plex.${DOMAINNAME}`)"
-    #  - "traefik.http.routers.plex-rtr.tls=true"
-    #  ## Middlewares
-    #  - "traefik.http.routers.plex-rtr.middlewares=chain-no-auth@file"
-    #  ## HTTP Services
-    #  - "traefik.http.routers.plex-rtr.service=plex-svc"
-    #  - "traefik.http.services.plex-svc.loadbalancer.server.port=32400"
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.plex-rtr.entrypoints=https"
+      - "traefik.http.routers.plex-rtr.rule=Host(`plex.${DOMAINNAME}`)"
+      - "traefik.http.routers.plex-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.plex-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.plex-rtr.service=plex-svc"
+      - "traefik.http.services.plex-svc.loadbalancer.server.port=32400"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:32400/identity || exit 1
       interval: 1m30s
@@ -680,8 +672,6 @@ services:
         published: 8181
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Tautulli:/config
       - ${USERDIR}/Services/Plex/config/Library/Application Support/Plex Media Server/Logs:/Plex_logs
@@ -840,8 +830,6 @@ services:
         published: 5055
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Overseer:/app/config
     environment:
@@ -1083,8 +1071,6 @@ services:
         published: 180
         protocol: tcp
         mode: host
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
     volumes:
       - ${USERDIR}/Services/Heimdall:/config
     environment:
