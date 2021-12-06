@@ -9,14 +9,24 @@ To run the script, use something like this:
 node /home/user/Services/Shared/Grafana/InternetUsage/MytInternetAccount/app.js >> /home/user/Services/Shared/Grafana/InternetUsage/MytInternetAccount/last_run.log 2>&1
 ```
 
-The JSON for my panel on my Grafana dashboard is:
+The JSON for my panel on my Grafana dashboard is below. Keep in mind to update it to your own needs.
 ```json
 {
-  "datasource": "Database",
+  "id": 242,
+  "gridPos": {
+    "h": 3,
+    "w": 5,
+    "x": 15,
+    "y": 80
+  },
+  "type": "stat",
+  "datasource": "Manual",
+  "pluginVersion": "8.0.4",
+  "timeFrom": "now/M",
+  "hideTimeOverride": true,
+  "interval": "1h",
   "fieldConfig": {
     "defaults": {
-      "custom": {},
-      "unit": "deckbytes",
       "thresholds": {
         "mode": "absolute",
         "steps": [
@@ -26,19 +36,11 @@ The JSON for my panel on my Grafana dashboard is:
           }
         ]
       },
-      "mappings": []
+      "mappings": [],
+      "unit": "deckbytes"
     },
     "overrides": []
   },
-  "gridPos": {
-    "h": 2,
-    "w": 5,
-    "x": 13,
-    "y": 79
-  },
-  "hideTimeOverride": true,
-  "id": 242,
-  "interval": "1h",
   "options": {
     "reduceOptions": {
       "values": false,
@@ -48,12 +50,12 @@ The JSON for my panel on my Grafana dashboard is:
       "fields": ""
     },
     "orientation": "auto",
+    "text": {},
     "textMode": "auto",
     "colorMode": "background",
     "graphMode": "area",
     "justifyMode": "auto"
   },
-  "pluginVersion": "7.3.7",
   "targets": [
     {
       "alias": "Bandwidth Left",
@@ -84,9 +86,7 @@ The JSON for my panel on my Grafana dashboard is:
       "tags": []
     }
   ],
-  "timeFrom": "7d",
-  "type": "stat",
-  "timeShift": null,
-  "title": ""
+  "maxDataPoints": null,
+  "timeShift": null
 }
 ```
