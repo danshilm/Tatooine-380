@@ -5,6 +5,9 @@ networks:
     external: true
   proxy:
     external: true
+  monitorss:
+    name: monitorss
+    internal: true
 
 services:
   # netdata:
@@ -222,4 +225,65 @@ services:
       - /dev/sdb
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  mrss-redis:
+    image: redis:alpine
+    container_name: mrss-redis
+    networks:
+      - monitorss
+    restart: unless-stopped
+
+  mrss-mongo:
+    image: mongo:4.4
+    container_name: mrss-mongo
+    command: mongod --port 27017
+    networks:
+      - monitorss
+    volumes:
+      - ${USERDIR}/Services/Monitoring/monitorss/db:/data/db
+    restart: unless-stopped
+
+  mrss-bot:
+    image: synzen/monitorss
+    container_name: mrss-bot
+    depends_on:
+      - mrss-mongo
+    networks:
+      - monitorss
+      - web
+    environment:
+      DRSS_START: bot
+      DRSS_BOT_TOKEN: ${MONITORSS_BOT_TOKEN:?MonitoRSS bot token not set}
+      DRSS_DATABASE_URI: mongodb://mrss-mongo:27017/rss
+    restart: unless-stopped
+
+  mrss-web:
+    image: synzen/monitorss
+    container_name: mrss-web
+    depends_on:
+      - mrss-redis
+      - mrss-mongo
+    networks:
+      - monitorss
+      - web
+    environment:
+      DRSS_START: web
+      DRSSWEB_BOT_TOKEN: ${MONITORSS_BOT_TOKEN:?MonitoRSS bot token not set}
+      DRSSWEB_DATABASE_REDIS: redis://mrss-redis:6379
+      DRSSWEB_DATABASE_URI: mongodb://mrss-mongo:27017/rss
+      DRSSWEB_BOT_REDIRECTURI: https://monitorss.${DOMAINNAME}/authorize
+      DRSSWEB_BOT_CLIENTID: ${MONITORSS_BOT_CLIENTID:?MonitoRSS bot client id not set}
+      DRSSWEB_BOT_CLIENTSECRET: ${MONITORSS_BOT_CLIENTSECRET:?MonitoRSS bot client secret not set}
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.monitorss-rtr.entrypoints=https"
+      - "traefik.http.routers.monitorss-rtr.rule=Host(`monitorss.${DOMAINNAME}`)"
+      - "traefik.http.routers.monitorss-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.monitorss-rtr.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.monitorss-rtr.service=monitorss-svc"
+      - "traefik.http.services.monitorss-svc.loadbalancer.server.port=8081"
     restart: unless-stopped

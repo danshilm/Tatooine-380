@@ -48,6 +48,7 @@ The compose file in [Monitoring](Services/Monitoring) contains:
 - [atribe/speedtest-for-influxdb-and-grafana](https://github.com/atribe/Speedtest-for-InfluxDB-and-Grafana)
 - [amir20/dozzle](https://github.com/amir20/dozzle)
 - [analogj/scrutiny](https://github.com/AnalogJ/scrutiny)
+- [synzen/monitorss](https://github.com/synzen/MonitoRSS-Clone)
 
 TODO:
 
