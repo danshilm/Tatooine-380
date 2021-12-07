@@ -1,0 +1,2 @@
+[submodule "Services/Shared/Plex/PlexTraktSync"]
+	url = https://github.com/Taxel/PlexTraktSync.git
