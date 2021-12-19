@@ -314,7 +314,7 @@ services:
       - "traefik.http.routers.sonarr-rtr.service=sonarr-svc"
       - "traefik.http.routers.sonarr-rtr-bypass.service=sonarr-svc"
       - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
-     healthcheck:
+    healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8989/api/v3/system/status?apikey=${SONARR_API_KEY} || exit 1
       interval: 1m30s
       timeout: 15s
@@ -1023,7 +1023,7 @@ services:
       - PMA_ARBITRARY=1
 
   filerun:
-    image: afian/filerun
+    image: filerun/filerun
     container_name: filerun
     hostname: filerun
     security_opt:
