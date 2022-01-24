@@ -702,6 +702,10 @@ services:
         published: 32400
         protocol: tcp
         mode: host
+      - target: 33400
+        published: 33400
+        protocol: tcp
+        mode: host
     #   - target: 32410 # GSM network discovery
     #     published: 32410
     #     protocol: udp
