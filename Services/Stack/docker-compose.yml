@@ -845,7 +845,7 @@ services:
   #   restart: unless-stopped
 
   emby:
-    image: linuxserver/emby
+    image: linuxserver/emby:beta
     container_name: emby
     hostname: emby
     security_opt:
