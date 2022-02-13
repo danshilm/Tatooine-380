@@ -39,7 +39,6 @@
 
 [log]
   level = "DEBUG"
-  filePath = "/logs/traefik.log"
 
 [accessLog]
   filePath = "/logs/access.log"
