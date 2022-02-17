@@ -42,6 +42,7 @@ The compose file in [Monitoring](Services/Monitoring) contains:
 
 - [netdata/netdata](https://github.com/netdata/netdata)
 - [grafana/grafana](https://github.com/grafana/grafana)
+- [grafana/grafana-image-renderer](https://github.com/grafana/grafana-image-renderer)
 - [prom/prometheus](https://github.com/prometheus/prometheus)
 - [influxdb](https://github.com/influxdata/influxdb) v1.8
 - [boerderij/varken](https://github.com/Boerderij/Varken)
