@@ -1,38 +1,44 @@
 import { InfluxDB } from 'influx';
 import { Axios } from 'axios';
 import { DateTime } from 'luxon';
-import { writeFileSync } from 'fs';
 
 interface LoginResponse {
   token: string;
 }
 
-interface BankDetails {
+interface UsageHistory {
   response: {
-    convertedBalance: string;
-    balance: string;
-    validitydate: string;
-    creditLimit: string;
-    rawaccumulatedusage: string;
-    bankName: string;
-    category: string;
-    categoryName: string;
-    isUnlimitedBank: string;
-    accumulatedusage: string;
+    SubscriptionIdentifier: string;
+    ALEPOEDRID: string;
+    EndTime: string;
+    TotalUsage: string;
+    EventType: string;
+    UnitCharges: string;
+    subscriberId: string;
+    CallDuration: string;
+    CustomField1: string;
+    SubscriptionType: string;
+    CustomField2: string;
+    SessionDuration: string;
+    CustomField3: string;
+    CustomField4: string;
+    PARENTSESSIONID: string;
+    CustomField6: string;
+    BankDeducted: string;
+    startTime: string;
+    ChargeLabel: string;
   }[];
   errorMessage: string;
   errorCode: string;
 }
 
-const now = DateTime.now().setLocale('en-GB');
-
 // Fill those up
-const mytLoginDetails = { username: 'username', password: 'password' };
+const mytLoginDetails = { username: '37393261-1', password: 'W6U3H' };
 const influxdbDetails = {
-  database: 'database name',
-  host: 'hostname or ip address',
+  database: 'manual',
+  host: '192.168.100.3',
   port: 8086,
-  username: 'username if applicable, or set this as undefined, just like the password on the next line',
+  username: undefined,
   password: undefined,
 };
 
@@ -62,14 +68,26 @@ const app = async () => {
   );
 
   if (!response) {
-    return console.log(`${now.toISO}: Error logging in`);
+    return console.log('Error logging in');
   }
 
-  const { data: bankDetails } = await axiosInstance.post<BankDetails>(
-    `https://internetaccount.myt.mu/rest-services/selfcare/subscriber/${mytLoginDetails.username}/bankInstanceList`,
+  const now = DateTime.now().setLocale('en-GB');
+  const { data: usageHistory } = await axiosInstance.post<UsageHistory>(
+    'https://internetaccount.myt.mu/rest-services/selfcare/generic/getMediationEDR',
     {
-      identifierName: 'USERNAI',
-      identifierValue: mytLoginDetails.username,
+      subscriberId: mytLoginDetails.username,
+      startIndex: 0,
+      MaxCount: 35,
+      toDate: now.toLocaleString({
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }),
+      fromDate: now.minus({ months: 1 }).endOf('month').toLocaleString({
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }),
     },
     {
       headers: {
@@ -78,16 +96,8 @@ const app = async () => {
     }
   );
 
-  if (!bankDetails || bankDetails.errorCode !== '0') {
-    return console.log(`${now.toISO}: Error getting usage history`);
-  }
-
-  const dataRemaining = bankDetails.response.find(
-    (res) => res.bankName === 'LimitedData'
-  )?.balance;
-
-  if (!dataRemaining) {
-    return console.log(`${now.toISO}: Error getting data balance left`);
+  if (!usageHistory) {
+    return console.log('Error getting usage history');
   }
 
   const influx = new InfluxDB({
@@ -108,23 +118,18 @@ const app = async () => {
       },
       fields: {
         // in bytes
-        data_left: Number(dataRemaining),
+        data_used: parseInt(usageHistory.response[0].TotalUsage),
       },
     },
   ]);
 
-  const remaining = (Number(dataRemaining) / 1024 / 1024);
-
-  const output = `${now.toISO()}: bandwidth remaining ${remaining.toFixed(0)} MB / ${(remaining / 1024).toFixed(2)} GB, ${((remaining / 4194304) * 100).toFixed(2)}% left`;
-
-  writeFileSync('last_run.log', `${output}\n`, {
-    flag: 'as+',
-    encoding: 'utf-8'
-  })
-
-  console.log(output);
+  console.log(
+    `${now.toISO()}: bandwidth used ${(
+      parseInt(usageHistory.response[0].TotalUsage) /
+      1024 /
+      1024
+    ).toFixed(0)} MB`
+  );
 };
 
-app().catch((e) =>
-  console.log(`${now.toISO}: Oops, something went wrong: ${e}`)
-);
+app().catch((e) => console.log(`Oops, something went wrong: ${e}`));
