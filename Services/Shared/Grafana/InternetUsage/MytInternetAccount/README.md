@@ -7,7 +7,7 @@ Modify the `mytLoginDetails` and `influxdbDetails` variables to your needs and m
 To run the script, use something like this:
 
 ```bash
-cd /home/user/Services/Shared/Grafana/InternetUsage/MytInternetAccount && node_modules/.bin/ts-node app.ts >> last_run.log 2>&1
+cd /home/user/Services/Shared/Grafana/InternetUsage/MytInternetAccount && yarn start >> last_run.log 2>&1
 ```
 
 The JSON for my panel on my Grafana dashboard is below. Keep in mind to update it to your own needs (it's probably just easier to refer to some of the key properties of the panel when making your own).
