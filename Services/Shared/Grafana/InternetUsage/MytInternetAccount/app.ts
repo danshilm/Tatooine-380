@@ -32,6 +32,8 @@ interface UsageHistory {
   errorCode: string;
 }
 
+const now = DateTime.now().setLocale('en-GB');
+
 // Fill those up
 const mytLoginDetails = { username: '37393261-1', password: 'W6U3H' };
 const influxdbDetails = {
@@ -68,10 +70,9 @@ const app = async () => {
   );
 
   if (!response) {
-    return console.log('Error logging in');
+    return console.log(`${now.toISO}: Error logging in`);
   }
 
-  const now = DateTime.now().setLocale('en-GB');
   const { data: usageHistory } = await axiosInstance.post<UsageHistory>(
     'https://internetaccount.myt.mu/rest-services/selfcare/generic/getMediationEDR',
     {
@@ -97,7 +98,7 @@ const app = async () => {
   );
 
   if (!usageHistory) {
-    return console.log('Error getting usage history');
+    return console.log(`${now.toISO}: Error getting usage history`);
   }
 
   const influx = new InfluxDB({
@@ -132,4 +133,6 @@ const app = async () => {
   );
 };
 
-app().catch((e) => console.log(`Oops, something went wrong: ${e}`));
+app().catch((e) =>
+  console.log(`${now.toISO}: Oops, something went wrong: ${e}`)
+);
