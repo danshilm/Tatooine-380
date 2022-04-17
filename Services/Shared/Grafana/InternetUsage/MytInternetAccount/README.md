@@ -61,14 +61,11 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
   "targets": [
     {
       "alias": "Bandwidth Left",
-      "groupBy": [
-        {
-          "params": [
-            "monthyear"
-          ],
-          "type": "tag"
-        }
-      ],
+      "datasource": {
+        "type": "influxdb",
+        "uid": "000000006"
+      },
+      "groupBy": [],
       "measurement": "internet_usage_myt",
       "orderByTime": "ASC",
       "policy": "default",
@@ -80,26 +77,14 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
           {
             "type": "field",
             "params": [
-              "data_used"
-            ]
-          },
-          {
-            "type": "math",
-            "params": [
-              "*-1+2000000000000"
+              "data_left"
             ]
           }
         ]
       ],
-      "tags": [],
-      "datasource": {
-        "uid": "000000006",
-        "type": "influxdb"
-      },
-      "query": "SELECT \"data_used\" FROM \"internet_usage_myt\" WHERE $timeFilter GROUP BY \"monthyear\"",
-      "rawQuery": false
+      "tags": []
     }
   ],
-  "interval": null
+  "interval": "1h"
 }
 ```
