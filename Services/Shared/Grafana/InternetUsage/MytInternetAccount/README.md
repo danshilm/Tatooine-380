@@ -1,15 +1,15 @@
 ## Myt Internet Account Usage Scraper
 
-This is meant to run as a cronjob (I run it hourly personally) to grab the remaining volume of data you can still use in one month IF you use [MyT Home](https://home.myt.mu/) as your ISP.
+This is meant to run as a cronjob everyday to grab the remaining volume of data you can still upload/download in one month IF you use [MyT Home](https://home.myt.mu/) as your ISP.
 
-Modify the `internetAccountUsername`, `internetAccountPassword` and `influx` variables to your needs and make sure to install the required packages with `npm install` first inside the MytInternetAccount folder. 
+Modify the `mytLoginDetails` and `influxdbDetails` variables to your needs and make sure to install the required packages with `yarn install` first inside the MytInternetAccount folder. 
 
 To run the script, use something like this:
 ```bash
-node /home/user/Services/Shared/Grafana/InternetUsage/MytInternetAccount/app.js >> /home/user/Services/Shared/Grafana/InternetUsage/MytInternetAccount/last_run.log 2>&1
+cd /home/$USER/Services/Shared/Grafana/InternetUsage/MytInternetAccount && node_modules/.bin/ts-node app.ts >> last_run.log 2>&1
 ```
 
-The JSON for my panel on my Grafana dashboard is below. Keep in mind to update it to your own needs.
+The JSON for my panel on my Grafana dashboard is below. Keep in mind to update it to your own needs (it's probably just easier to refer to some of the key properties of the panel when making your own).
 ```json
 {
   "id": 242,
@@ -20,13 +20,16 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
     "y": 80
   },
   "type": "stat",
-  "datasource": "Manual",
-  "pluginVersion": "8.0.4",
+  "datasource": {
+    "uid": "000000006",
+    "type": "influxdb"
+  },
+  "pluginVersion": "v1.0",
   "timeFrom": "now/M",
   "hideTimeOverride": true,
-  "interval": "1h",
   "fieldConfig": {
     "defaults": {
+      "mappings": [],
       "thresholds": {
         "mode": "absolute",
         "steps": [
@@ -36,8 +39,7 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
           }
         ]
       },
-      "mappings": [],
-      "unit": "deckbytes"
+      "unit": "bytes"
     },
     "overrides": []
   },
@@ -50,11 +52,11 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
       "fields": ""
     },
     "orientation": "auto",
-    "text": {},
     "textMode": "auto",
     "colorMode": "background",
     "graphMode": "area",
-    "justifyMode": "auto"
+    "justifyMode": "auto",
+    "text": {}
   },
   "targets": [
     {
@@ -62,7 +64,7 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
       "groupBy": [
         {
           "params": [
-            "month"
+            "monthyear"
           ],
           "type": "tag"
         }
@@ -76,17 +78,28 @@ The JSON for my panel on my Grafana dashboard is below. Keep in mind to update i
       "select": [
         [
           {
+            "type": "field",
             "params": [
-              "data_left"
-            ],
-            "type": "field"
+              "data_used"
+            ]
+          },
+          {
+            "type": "math",
+            "params": [
+              "*-1+2000000000000"
+            ]
           }
         ]
       ],
-      "tags": []
+      "tags": [],
+      "datasource": {
+        "uid": "000000006",
+        "type": "influxdb"
+      },
+      "query": "SELECT \"data_used\" FROM \"internet_usage_myt\" WHERE $timeFilter GROUP BY \"monthyear\"",
+      "rawQuery": false
     }
   ],
-  "maxDataPoints": null,
-  "timeShift": null
+  "interval": null
 }
 ```
