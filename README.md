@@ -15,7 +15,6 @@ The compose file in [Stack](Services/Stack) contains:
 - [linuxserver/radarr](https://docs.linuxserver.io/images/docker-radarr)
 - [linuxserver/sonarr](https://docs.linuxserver.io/images/docker-sonarr)
 - [linuxserver/lidarr](https://docs.linuxserver.io/images/docker-lidarr)
-- [randomninjaatk/amd](https://github.com/RandomNinjaAtk/docker-amd)
 - [linuxserver/bazarr](https://docs.linuxserver.io/images/docker-bazarr)
 - [hotio/readarr](https://github.com/Readarr/Readarr)
 - [linuxserver/sabnzbd](https://docs.linuxserver.io/images/docker-sabnzbd)
