@@ -561,49 +561,6 @@ services:
       - flaresolverr
     restart: unless-stopped
 
-  nzbhydra:
-    image: linuxserver/nzbhydra2
-    container_name: nzbhydra
-    hostname: nzbhydra
-    security_opt:
-      - no-new-privileges:true
-    networks:
-      - web
-    ports:
-      - target: 5076
-        published: 5076
-        protocol: tcp
-        mode: host
-    volumes:
-      - ${USERDIR}/Services/NzbHydra:/config
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_torrent:/data/Downloads/blackhole_torrent
-      - ${THEVAULTDIR}/PlexMediaServer/Downloads/blackhole_nzb:/data/Downloads/blackhole_nzb
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    labels:
-      - "traefik.enable=true"
-      ## HTTP Routers Auth Bypass
-      - "traefik.http.routers.nzbhydra-rtr-bypass.entrypoints=https"
-      - "traefik.http.routers.nzbhydra-rtr-bypass.rule=Host(`nzbhydra.${DOMAINNAME}`) && Query(`apikey=${NZBHYDRA_API_KEY}`)"
-      - "traefik.http.routers.nzbhydra-rtr-bypass.tls=true"
-      - "traefik.http.routers.nzbhydra-rtr-bypass.priority=100"
-      ## HTTP Routers
-      - "traefik.http.routers.nzbhydra-rtr.entrypoints=https"
-      - "traefik.http.routers.nzbhydra-rtr.rule=Host(`nzbhydra.${DOMAINNAME}`)"
-      - "traefik.http.routers.nzbhydra-rtr.tls=true"
-      - "traefik.http.routers.nzbhydra-rtr-bypass.priority=99"
-      ## Middlewares
-      - "traefik.http.routers.nzbhydra-rtr-bypass.middlewares=chain-no-auth@file"
-      - "traefik.http.routers.nzbhydra-rtr.middlewares=chain-authelia@file"
-      ## HTTP Services
-      - "traefik.http.routers.nzbhydra-rtr.service=nzbhydra-svc"
-      - "traefik.http.routers.nzbhydra-rtr-bypass.service=nzbhydra-svc"
-      - "traefik.http.services.nzbhydra-svc.loadbalancer.server.port=5076"
-    restart: unless-stopped
-
   prowlarr:
     image: hotio/prowlarr:nightly
     container_name: prowlarr

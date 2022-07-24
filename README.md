@@ -20,7 +20,6 @@ The compose file in [Stack](Services/Stack) contains:
 - [linuxserver/sabnzbd](https://docs.linuxserver.io/images/docker-sabnzbd)
 - [linuxserver/jackett](https://docs.linuxserver.io/images/docker-jackett)
 - [flaresolverr/flaresolverr](https://github.com/FlareSolverr/FlareSolverr)
-- [linuxserver/nzbhydra](https://docs.linuxserver.io/images/docker-nzbhydra2)
 - [hotio/prowlarr](https://github.com/Prowlarr/Prowlarr/)
 - [linuxserver/plex](https://docs.linuxserver.io/images/docker-plex)
 - [linuxserver/tautulli](https://docs.linuxserver.io/images/docker-tautulli)
