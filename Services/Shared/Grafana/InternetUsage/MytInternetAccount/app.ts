@@ -1,6 +1,7 @@
 import { InfluxDB } from 'influx';
 import { Axios } from 'axios';
 import { DateTime } from 'luxon';
+import { writeFileSync } from 'fs';
 
 interface LoginResponse {
   token: string;
@@ -114,13 +115,16 @@ const app = async () => {
     },
   ]);
 
-  console.log(
-    `${now.toISO()}: bandwidth used ${(
-      Number(dataRemaining) /
-      1024 /
-      1024
-    ).toFixed(0)} MB`
-  );
+  const remaining = (Number(dataRemaining) / 1024 / 1024);
+
+  const output = `${now.toISO()}: bandwidth remaining ${remaining.toFixed(0)} MB / ${(remaining / 1024).toFixed(2)} GB, ${((remaining / 4194304) * 100).toFixed(2)}% left`;
+
+  writeFileSync('last_run.log', `${output}\n`, {
+    flag: 'as+',
+    encoding: 'utf-8'
+  })
+
+  console.log(output);
 };
 
 app().catch((e) =>
