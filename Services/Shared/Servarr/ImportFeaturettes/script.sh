@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 now=$(date +'%F %T')
 radarr_logfile="$(pwd)/radarr_lastrun.log"

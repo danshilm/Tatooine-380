@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # cd to appropriate folder
 cd /home/user/Services/Shared/Grafana/FolderSizeMonitoring
