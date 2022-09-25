@@ -86,8 +86,6 @@ const app = async () => {
     (res) => res.bankName === 'LimitedData'
   )?.balance;
 
-  console.log(dataRemaining);
-
   if (!dataRemaining) {
     return console.log(`${now.toISO}: Error getting data balance left`);
   }

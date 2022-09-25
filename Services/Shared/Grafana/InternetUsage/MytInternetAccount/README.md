@@ -2,13 +2,22 @@
 
 This is meant to run as a cronjob everyday to grab the remaining volume of data you can still upload/download in one month IF you use [MyT Home](https://home.myt.mu/) as your ISP.
 
-Modify the `mytLoginDetails` and `influxdbDetails` variables to your needs and make sure to install the required packages with `yarn install` first inside the MytInternetAccount folder.
+Modify the `mytLoginDetails` and `influxdbDetails` variables to your needs and make sure to install the required packages with `pnpm install` first inside the MytInternetAccount folder.
 
 To run the script, use something like this:
 
 ```bash
-cd /home/$USER/Services/Shared/Grafana/InternetUsage/MytInternetAccount && yarn dev
+cd /home/$USER/Services/Shared/Grafana/InternetUsage/MytInternetAccount && pnpm dev
 ```
+
+<details>
+  <summary>If you use `npm` or `yarn` instead</summary>
+
+  Delete the `pnpm-lock.yaml` file and install the packages using the package manager of your choice.
+
+</details>
+
+---
 
 ### Troubleshooting
 
