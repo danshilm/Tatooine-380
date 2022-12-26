@@ -729,6 +729,12 @@ services:
       - "traefik.http.routers.tautulli-rtr.service=tautulli-svc"
       - "traefik.http.routers.tautulli-rtr-bypass.service=tautulli-svc"
       - "traefik.http.services.tautulli-svc.loadbalancer.server.port=8181"
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8181/status | grep 'Ok' || exit 1
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
 
   # jellyfin:
