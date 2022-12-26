@@ -503,6 +503,12 @@ services:
       - "traefik.http.routers.sabnzbd-rtr.service=sabnzbd-svc"
       - "traefik.http.routers.sabnzbd-rtr-bypass.service=sabnzbd-svc"
       - "traefik.http.services.sabnzbd-svc.loadbalancer.server.port=8080"
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8180/api?apikey=${SABNZBD_API_KEY}&mode=status&skip_dashboard=1&output=json || exit 1
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
 
   jackett:
