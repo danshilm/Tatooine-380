@@ -26,7 +26,7 @@ services:
     ports:
       - 127.0.0.1:2375:2375
     volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - CONTAINERS=1
     restart: always
@@ -86,8 +86,8 @@ services:
       - "traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file"
     healthcheck:
       test: wget -qO - http://localhost:8080/ping | grep 'OK' || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 30s
     restart: always
@@ -100,7 +100,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-       ## HTTP Routers
+      ## HTTP Routers
       - "traefik.http.routers.error-pages-rtr.entrypoints=https"
       - "traefik.http.routers.error-pages-rtr.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.routers.error-pages-rtr.tls=true"
@@ -138,8 +138,8 @@ services:
       - "traefik.http.services.authelia-svc.loadbalancer.server.port=9091"
     healthcheck:
       test: wget -q -O - http://localhost:9091/api/state/ | grep '"status":"OK"' || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 30s
     restart: always
@@ -204,7 +204,7 @@ services:
       - WEBUI_PORT=8100
     labels:
       - "traefik.enable=true"
-       ## HTTP Routers
+      ## HTTP Routers
       - "traefik.http.routers.qbittorrent-rtr.entrypoints=https"
       - "traefik.http.routers.qbittorrent-rtr.rule=Host(`qbit.${DOMAINNAME}`)"
       - "traefik.http.routers.qbittorrent-rtr.tls=true"
@@ -216,8 +216,8 @@ services:
       - "traefik.http.services.qbittorrent-svc.loadbalancer.server.port=8100"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8100/api/v2/app/version || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 30s
     restart: unless-stopped
@@ -266,8 +266,8 @@ services:
       - "traefik.http.services.radarr-svc.loadbalancer.server.port=7878"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:7878/api/v3/system/status?apikey=${RADARR_API_KEY} || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -316,8 +316,8 @@ services:
       - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8989/api/v3/system/status?apikey=${SONARR_API_KEY} || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -366,8 +366,8 @@ services:
       - "traefik.http.services.lidarr-svc.loadbalancer.server.port=8686"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8686/api/v1/system/status?apikey=${LIDARR_API_KEY} || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -415,8 +415,8 @@ services:
       - "traefik.http.services.bazarr-svc.loadbalancer.server.port=6767"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:6767/api/system/status?apikey=${BAZARR_API_KEY} || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -456,8 +456,8 @@ services:
       - "traefik.http.services.readarr-svc.loadbalancer.server.port=8787"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8787/api/v1/system/status?apikey=${READARR_API_KEY} || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -683,8 +683,8 @@ services:
       - "traefik.http.services.plex-svc.loadbalancer.server.port=32400"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:32400/identity || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -814,8 +814,8 @@ services:
       - "traefik.http.services.emby-svc.loadbalancer.server.port=8096"
     healthcheck:
       test: curl -f http://localhost:8096/emby/system/info/public?format=json || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: always
@@ -918,12 +918,12 @@ services:
       - "traefik.http.services.overseerr-svc.loadbalancer.server.port=5055"
     healthcheck:
       test: wget http://localhost:5055/api/v1/status -qO /dev/null || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
-    
+
   filerun-db:
     image: mariadb:10.1
     container_name: filerun-db
@@ -939,6 +939,12 @@ services:
       MYSQL_USER: filerun
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: filerun_db
+    healthcheck:
+      test: mysql filerun_db -ufilerun -ppassword -e 'SELECT 1;' || exit 1
+      interval: 60s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
     restart: unless-stopped
 
   phpmyadmin:
@@ -1122,8 +1128,8 @@ services:
       - "traefik.http.services.lychee-svc.loadbalancer.server.port=80"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:80/ || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: always
