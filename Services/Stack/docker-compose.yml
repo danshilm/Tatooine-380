@@ -505,8 +505,8 @@ services:
       - "traefik.http.services.sabnzbd-svc.loadbalancer.server.port=8080"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8180/api?apikey=${SABNZBD_API_KEY}&mode=status&skip_dashboard=1&output=json || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -606,8 +606,8 @@ services:
       - "traefik.http.services.prowlarr-svc.loadbalancer.server.port=9696"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:9696/api/v1/system/status?apikey=${PROWLARR_API_KEY} || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 20s
     restart: unless-stopped
@@ -731,8 +731,8 @@ services:
       - "traefik.http.services.tautulli-svc.loadbalancer.server.port=8181"
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://localhost:8181/status | grep 'Ok' || exit 1
-      interval: 1m30s
-      timeout: 15s
+      interval: 60s
+      timeout: 10s
       retries: 3
       start_period: 30s
     restart: unless-stopped
